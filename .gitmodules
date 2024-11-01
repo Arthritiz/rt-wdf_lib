@@ -1,0 +1,3 @@
+[submodule "modules/armadillo-code"]
+	path = modules/armadillo-code
+	url = git@gitlab.com:conradsnicta/armadillo-code.git

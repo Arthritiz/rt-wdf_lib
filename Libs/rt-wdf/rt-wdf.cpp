@@ -197,6 +197,11 @@ std::string wdfRootNL::getType( ) const {
     return "Root (NL-type)";
 }
 
+int wdfRootNL::getNumPorts()
+{
+    return NlSolver->getNumPorts();
+}
+
 
 #pragma mark Simple Root
 //==============================================================================

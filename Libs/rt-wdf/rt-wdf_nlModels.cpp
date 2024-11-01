@@ -125,17 +125,56 @@ void npnEmModel::calculate( vec* fNL,
     const double Is_BJT_o_ALPHAF = Is_BJT/ALPHAF;
 
 
+    // i_bc
     (*fNL)(*currentPort) = -Is_BJT*(exp(vBE_o_VT_BJT )-1)+(Is_BJT_o_ALPHAR)*(exp(vBC_o_VT_BJT)-1);
+
+    // dI_bc/dVbc
     (*JNL)((*currentPort),(*currentPort)) = (Is_BJT_o_ALPHAR/VT_BJT)*exp(vBC_o_VT_BJT);
+    // dI_bc/dVbe
     (*JNL)((*currentPort),((*currentPort)+1)) = (-Is_BJT_o_VT_BJT)*exp(vBE_o_VT_BJT );
 
+    // i_be
     (*fNL)((*currentPort)+1) = (Is_BJT_o_ALPHAF)*(exp(vBE_o_VT_BJT )-1)-Is_BJT*(exp(vBC_o_VT_BJT)-1);
+    // dI_be/dVbc
     (*JNL)(((*currentPort)+1),(*currentPort)) = (-Is_BJT_o_VT_BJT)*exp(vBC_o_VT_BJT);
+    // dI_be/dVbe
     (*JNL)(((*currentPort)+1),((*currentPort)+1)) = (Is_BJT_o_ALPHAF/VT_BJT)*exp(vBE_o_VT_BJT );
 
     (*currentPort) = (*currentPort)+getNumPorts();
 }
 
+pnpEmModel::pnpEmModel(): nlModel(2) {}
+
+void pnpEmModel::calculate( vec* fNL,
+                            mat* JNL,
+                            vec* x,
+                            int* currentPort)
+{
+    const double vEB = (*x)(*currentPort);
+    const double vCB = (*x)((*currentPort)+1);
+
+    const double vEB_o_VT_BJT = vEB/VT_BJT;
+    const double vCB_o_VT_BJT = vCB/VT_BJT;
+    const double Is_BJT_o_VT_BJT = Is_BJT/VT_BJT;
+    const double Is_BJT_o_ALPHAR = Is_BJT/ALPHAR;
+    const double Is_BJT_o_ALPHAF = Is_BJT/ALPHAF;
+
+    // i_eb
+    (*fNL)(*currentPort) = (Is_BJT_o_ALPHAF)*(exp(vEB_o_VT_BJT)-1) - Is_BJT*(exp(vCB_o_VT_BJT)-1);
+    // dI_eb/dVeb
+    (*JNL)((*currentPort),(*currentPort)) = (Is_BJT_o_ALPHAF/VT_BJT)*exp(vEB_o_VT_BJT);
+    // dI_eb/dVcb
+    (*JNL)((*currentPort),((*currentPort)+1)) = (-Is_BJT_o_VT_BJT)*exp(vCB_o_VT_BJT);
+
+    // i_cb (-i_c)
+    (*fNL)((*currentPort)+1) = -Is_BJT*(exp(vEB_o_VT_BJT)-1) + (Is_BJT_o_ALPHAR)*(exp(vCB_o_VT_BJT)-1);
+    // dI_cb/dVeb
+    (*JNL)(((*currentPort)+1),(*currentPort)) = (-Is_BJT_o_VT_BJT)*exp(vEB_o_VT_BJT);
+    // dI_cb/dVcb
+    (*JNL)(((*currentPort)+1),((*currentPort)+1)) = (Is_BJT_o_ALPHAR/VT_BJT)*exp(vCB_o_VT_BJT);
+
+    (*currentPort) = (*currentPort)+getNumPorts();
+}
 
 //==============================================================================
 // Triode model according to Dempwolf et al

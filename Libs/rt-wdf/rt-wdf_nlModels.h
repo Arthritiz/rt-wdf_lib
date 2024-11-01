@@ -46,6 +46,7 @@
 // Bipolar Transistors:
 /** Enum to specify Ebers-Moll bipolar npn-transistor model in wdfRootNL */
 #define NPN_EM      10
+#define PNP_EM      11
 
 // Triode Tubes:
 /** Enum to specify Dempwolf triode tube model in wdfRootNL */
@@ -223,6 +224,17 @@ public:
 
 };
 
+class pnpEmModel: public nlModel
+{
+public:
+    pnpEmModel();
+
+    void calculate( vec* fNL,
+                    mat* JNL,
+                    vec* x,
+                    int* currentPort );
+
+};
 
 //==============================================================================
 class triDwModel : public nlModel {

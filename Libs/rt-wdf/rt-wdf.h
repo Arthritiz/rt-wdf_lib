@@ -519,6 +519,7 @@ public:
      */
     virtual std::string getType( ) const;
 
+    int getNumPorts();
 };
 
 
