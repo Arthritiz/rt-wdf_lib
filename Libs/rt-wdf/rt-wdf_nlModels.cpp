@@ -61,6 +61,7 @@ diodeModel::diodeModel() : nlModel( 1 ) {
 void diodeModel::calculate( vec* fNL,
                             mat* JNL,
                             vec* x,
+                            vec* lastX,
                             int* currentPort ) {
 
     const double vd = (*x)(*currentPort);
@@ -81,6 +82,7 @@ diodeApModel::diodeApModel( ) : nlModel( 1 ) {
 void diodeApModel::calculate( vec* fNL,
                               mat* JNL,
                               vec* x,
+                              vec* lastX,
                               int* currentPort) {
 
     const double vd = (*x)(*currentPort);
@@ -113,6 +115,7 @@ npnEmModel::npnEmModel() : nlModel( 2 ) {
 void npnEmModel::calculate( vec* fNL,
                             mat* JNL,
                             vec* x,
+                            vec* lastX,
                             int* currentPort) {
 
     const double vBC = (*x)(*currentPort);
@@ -143,13 +146,40 @@ void npnEmModel::calculate( vec* fNL,
     (*currentPort) = (*currentPort)+getNumPorts();
 }
 
+double vcrit = VT_BJT * std::log(VT_BJT/(std::sqrt(2)*Is_BJT));
+
+double limitStep(double vnew, double vold) {
+    double arg;
+
+    if ((vnew > vcrit) && (abs(vnew - vold) > (VT_BJT + VT_BJT))) {
+        if (vold > 0) {
+            arg = 1 + (vnew - vold)/VT_BJT;
+            if (arg > 0) {
+                vnew = vold + VT_BJT * std::log(arg);
+            } else {
+                vnew = vcrit;
+            }
+        } else {
+            vnew = VT_BJT * std::log(vnew/VT_BJT);
+        }
+    }
+
+    return vnew;
+}
+
 pnpEmModel::pnpEmModel(): nlModel(2) {}
 
 void pnpEmModel::calculate( vec* fNL,
                             mat* JNL,
                             vec* x,
+                            vec* lastX,
                             int* currentPort)
 {
+    for (int i = *currentPort; i < *currentPort + getNumPorts(); i++)
+    {
+        (*x)(i) = limitStep((*x)(i), (*lastX)(i));
+    }
+
     const double vEB = (*x)(*currentPort);
     const double vCB = (*x)((*currentPort)+1);
 
@@ -189,6 +219,7 @@ triDwModel::triDwModel() : nlModel( 2 ) {
 void triDwModel::calculate( vec* fNL,
                             mat* JNL,
                             vec* x,
+                            vec* lastX,
                             int* currentPort) {
 
     const double G = 2.242E-3;

@@ -100,6 +100,7 @@ public:
     virtual void calculate( vec* fNL,
                             mat* JNL,
                             vec* x,
+                            vec* lastX,
                             int* currentPort ) = 0;
 
     //----------------------------------------------------------------------
@@ -150,6 +151,7 @@ public:
     void calculate( vec* fNL,
                     mat* JNL,
                     vec* x,
+                    vec* lastX,
                     int* currentPort );
 
 };
@@ -185,6 +187,7 @@ public:
     void calculate( vec* fNL,
                     mat* JNL,
                     vec* x,
+                    vec* lastX,
                     int* currentPort );
 
 };
@@ -220,6 +223,7 @@ public:
     void calculate( vec* fNL,
                     mat* JNL,
                     vec* x,
+                    vec* lastX,
                     int* currentPort );
 
 };
@@ -232,6 +236,7 @@ public:
     void calculate( vec* fNL,
                     mat* JNL,
                     vec* x,
+                    vec* lastX,
                     int* currentPort );
 
 };
@@ -266,6 +271,7 @@ public:
     void calculate( vec* fNL,
                     mat* JNL,
                     vec* x,
+                    vec* lastX,
                     int* currentPort );
 
 };

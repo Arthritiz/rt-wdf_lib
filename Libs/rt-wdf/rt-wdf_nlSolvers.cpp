@@ -72,6 +72,11 @@ nlNewtonSolver::nlNewtonSolver( std::vector<int> nlList,
                 nlModels.push_back(new npnEmModel);
                 break;
             }
+            case PNP_EM:            // Ebers-Moll pnp BJT
+            {
+                nlModels.push_back(new pnpEmModel);
+                break;
+            }
             // Triode Tubes:
             case TRI_DW:            // Dempwolf triode model
             {
@@ -153,6 +158,11 @@ void nlNewtonSolver::nlSolve( vec* inWaves,
     //        printf(" %3g %9.2e %14.7e\n", iter, alpha, normF);
     }
 
+    if (iter == ITMAX)
+    {
+        std::cout << "convergence failed" << std::endl;
+    }
+
     (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * (*fNL);
 
 }
@@ -166,7 +176,7 @@ void nlNewtonSolver::evalNlModels( vec* inWaves,
 
 
     for ( nlModel* model : nlModels ) {
-        model->calculate( fNL, JNL, x, &currentPort );
+       model->calculate( fNL, JNL, x, this->x0, &currentPort );
     }
 
     (*Fmat_fNL) = myMatData->Fmat*(*fNL);

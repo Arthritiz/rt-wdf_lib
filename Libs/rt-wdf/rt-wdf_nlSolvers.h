@@ -52,9 +52,9 @@
 // Newton Solver config parameters
 
 /** tolerance for ||F||_2 */
-#define TOL     1.0e-06                     // TODO: evaluate physically meaningful tolerance.
+#define TOL     1.0e-04                     // TODO: evaluate physically meaningful tolerance.
 /** limit on function evaluations */
-#define ITMAX   50
+#define ITMAX   2000
 
 
 //==============================================================================
