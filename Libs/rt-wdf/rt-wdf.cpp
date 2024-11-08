@@ -161,7 +161,7 @@ std::string wdfRootRtype::getType( ) const {
 #pragma mark Non-Linear Root
 //==============================================================================
 wdfRootNL::wdfRootNL( int numSubtrees,
-                      std::vector<int> nlList,
+                      std::vector<nlModel*> nlList,
                       int solverType ) : wdfRoot( ),
                                          numSubtrees( numSubtrees ) {
     rootMatrixData.reset( new matData );

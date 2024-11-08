@@ -154,7 +154,7 @@ public:
                                 nonlinearities
      @param *myMatData          is a pointer to the E,F,M,N (and S) matrices
     */
-    nlNewtonSolver( std::vector<int> nlList,
+    nlNewtonSolver( std::vector<nlModel*> nlList,
                 matData* myMatData );
 
     /**

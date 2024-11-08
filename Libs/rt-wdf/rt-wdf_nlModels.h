@@ -231,14 +231,37 @@ public:
 class pnpEmModel: public nlModel
 {
 public:
-    pnpEmModel();
+    pnpEmModel(std::string modelName);
 
     void calculate( vec* fNL,
                     mat* JNL,
                     vec* x,
                     vec* lastX,
                     int* currentPort );
+private:
+    class ModelSpec
+    {
+    public:
+        ModelSpec() = default;
+        ModelSpec(double Is_BJT, double BETAF, double BETAR): Is_BJT(Is_BJT), BETAF(BETAF), BETAR(BETAR)
+        {
+            ALPHAF = BETAF/(1.0+BETAF);
+            ALPHAR = BETAR/(1.0+BETAR);
+        }
 
+        double Is_BJT;
+        double BETAF;
+        double BETAR;
+
+        double ALPHAF;
+        double ALPHAR;
+    };
+
+    static const std::map<std::string, ModelSpec> modelSpecs;
+
+    double limitStep(double vnew, double vold);
+    ModelSpec modelSpec;
+    double vcrit;
 };
 
 //==============================================================================

@@ -471,7 +471,7 @@ public:
                                 nlSolverClass.h for all solvers.
      */
     wdfRootNL( int numSubtrees,
-               std::vector<int> nlList,
+               std::vector<nlModel*> nlList,
                int solverType );
 
     //----------------------------------------------------------------------

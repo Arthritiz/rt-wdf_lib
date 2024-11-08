@@ -48,47 +48,9 @@ int nlSolver::getNumPorts( ) {
 //==============================================================================
 // Newton Solver
 //==============================================================================
-nlNewtonSolver::nlNewtonSolver( std::vector<int> nlList,
+nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
                         matData* myMatData ) : myMatData ( myMatData ) {
-
-    // set up Vec<nlModel> nlModels properly according to std::vector<int> nlList
-    for( int nlModel : nlList )
-    {
-        switch( nlModel ) {
-            // Diodes:
-            case DIODE:             // single diode
-            {
-                nlModels.push_back(new diodeModel);
-                break;
-            }
-            case DIODE_AP:          // antiparallel diode pair
-            {
-                nlModels.push_back(new diodeApModel);
-                break;
-            }
-            // Bipolar Transistors:
-            case NPN_EM:            // Ebers-Moll npn BJT
-            {
-                nlModels.push_back(new npnEmModel);
-                break;
-            }
-            case PNP_EM:            // Ebers-Moll pnp BJT
-            {
-                nlModels.push_back(new pnpEmModel);
-                break;
-            }
-            // Triode Tubes:
-            case TRI_DW:            // Dempwolf triode model
-            {
-                nlModels.push_back(new triDwModel);
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
-    }
+    nlModels = nlList;
 
     numNLPorts = 0;
     for ( nlModel* model : nlModels ) {
@@ -134,7 +96,6 @@ void nlNewtonSolver::nlSolve( vec* inWaves,
     }
 
     evalNlModels( inWaves, myMatData, x0 );
-
 
     double normF = norm(*F);
     //printf("iter alpha         ||F||_2\n");

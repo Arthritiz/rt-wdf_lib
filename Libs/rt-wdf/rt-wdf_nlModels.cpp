@@ -99,13 +99,7 @@ void diodeApModel::calculate( vec* fNL,
 // Transistor Models using Ebers-Moll equations
 // ("Large-signal behavior of junction transistors")
 //==============================================================================
-#define Is_BJT      5.911e-15
 #define VT_BJT      0.02585
-#define BETAF       1.434e3
-#define BETAR       1.262
-#define ALPHAF      (BETAF/(1.0+BETAF))     //TAKE CARE OF ( ) TO COMPILE CORRECTLY!!!!!! ARGHH!!
-#define ALPHAR      (BETAR/(1.0+BETAR))     //TAKE CARE OF ( ) TO COMPILE CORRECTLY!!!!!!
-
 
 npnEmModel::npnEmModel() : nlModel( 2 ) {
 
@@ -118,6 +112,12 @@ void npnEmModel::calculate( vec* fNL,
                             vec* lastX,
                             int* currentPort) {
 
+    const double Is_BJT = 5.911e-15;
+    const double BETAF  = 1.434e3;
+    const double BETAR  = 1.262;
+    const double ALPHAF = (BETAF/(1.0+BETAF));
+    const double ALPHAR = (BETAR/(1.0+BETAR));
+
     const double vBC = (*x)(*currentPort);
     const double vBE = (*x)((*currentPort)+1);
 
@@ -126,7 +126,6 @@ void npnEmModel::calculate( vec* fNL,
     const double Is_BJT_o_VT_BJT = Is_BJT/VT_BJT;
     const double Is_BJT_o_ALPHAR = Is_BJT/ALPHAR;
     const double Is_BJT_o_ALPHAF = Is_BJT/ALPHAF;
-
 
     // i_bc
     (*fNL)(*currentPort) = -Is_BJT*(exp(vBE_o_VT_BJT )-1)+(Is_BJT_o_ALPHAR)*(exp(vBC_o_VT_BJT)-1);
@@ -146,9 +145,13 @@ void npnEmModel::calculate( vec* fNL,
     (*currentPort) = (*currentPort)+getNumPorts();
 }
 
-double vcrit = VT_BJT * std::log(VT_BJT/(std::sqrt(2)*Is_BJT));
+const std::map<std::string, pnpEmModel::ModelSpec> pnpEmModel::modelSpecs = {
+    {"default", ModelSpec(5.911e-15, 1.434e3, 1.262)},
+    {"AC128-A", ModelSpec(85.8e-9, 85, 20)},
+    {"AC128-B", ModelSpec(120.8e-9, 120, 20)},
+};
 
-double limitStep(double vnew, double vold) {
+double pnpEmModel::limitStep(double vnew, double vold) {
     double arg;
 
     if ((vnew > vcrit) && (abs(vnew - vold) > (VT_BJT + VT_BJT))) {
@@ -167,7 +170,18 @@ double limitStep(double vnew, double vold) {
     return vnew;
 }
 
-pnpEmModel::pnpEmModel(): nlModel(2) {}
+pnpEmModel::pnpEmModel(std::string modelName): nlModel(2)
+{
+    auto iter = pnpEmModel::modelSpecs.find(modelName);
+    if (iter == pnpEmModel::modelSpecs.end())
+    {
+        throw;
+    }
+
+    this->modelSpec = iter->second;
+
+    vcrit = VT_BJT * std::log(VT_BJT/(std::sqrt(2)*this->modelSpec.Is_BJT));
+}
 
 void pnpEmModel::calculate( vec* fNL,
                             mat* JNL,
@@ -185,19 +199,19 @@ void pnpEmModel::calculate( vec* fNL,
 
     const double vEB_o_VT_BJT = vEB/VT_BJT;
     const double vCB_o_VT_BJT = vCB/VT_BJT;
-    const double Is_BJT_o_VT_BJT = Is_BJT/VT_BJT;
-    const double Is_BJT_o_ALPHAR = Is_BJT/ALPHAR;
-    const double Is_BJT_o_ALPHAF = Is_BJT/ALPHAF;
+    const double Is_BJT_o_VT_BJT = modelSpec.Is_BJT/VT_BJT;
+    const double Is_BJT_o_ALPHAR = modelSpec.Is_BJT/modelSpec.ALPHAR;
+    const double Is_BJT_o_ALPHAF = modelSpec.Is_BJT/modelSpec.ALPHAF;
 
     // i_eb
-    (*fNL)(*currentPort) = (Is_BJT_o_ALPHAF)*(exp(vEB_o_VT_BJT)-1) - Is_BJT*(exp(vCB_o_VT_BJT)-1);
+    (*fNL)(*currentPort) = (Is_BJT_o_ALPHAF)*(exp(vEB_o_VT_BJT)-1) - modelSpec.Is_BJT*(exp(vCB_o_VT_BJT)-1);
     // dI_eb/dVeb
     (*JNL)((*currentPort),(*currentPort)) = (Is_BJT_o_ALPHAF/VT_BJT)*exp(vEB_o_VT_BJT);
     // dI_eb/dVcb
     (*JNL)((*currentPort),((*currentPort)+1)) = (-Is_BJT_o_VT_BJT)*exp(vCB_o_VT_BJT);
 
     // i_cb (-i_c)
-    (*fNL)((*currentPort)+1) = -Is_BJT*(exp(vEB_o_VT_BJT)-1) + (Is_BJT_o_ALPHAR)*(exp(vCB_o_VT_BJT)-1);
+    (*fNL)((*currentPort)+1) = -modelSpec.Is_BJT*(exp(vEB_o_VT_BJT)-1) + (Is_BJT_o_ALPHAR)*(exp(vCB_o_VT_BJT)-1);
     // dI_cb/dVeb
     (*JNL)(((*currentPort)+1),(*currentPort)) = (-Is_BJT_o_VT_BJT)*exp(vEB_o_VT_BJT);
     // dI_cb/dVcb
