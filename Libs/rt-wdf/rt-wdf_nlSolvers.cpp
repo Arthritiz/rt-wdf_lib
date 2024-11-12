@@ -63,7 +63,8 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
     fNL      = new vec(numNLPorts, fill::zeros);
     JNL      = new mat(numNLPorts,numNLPorts, fill::zeros);
     Fmat_fNL = new vec(numNLPorts, fill::zeros);
-
+    Emat_in = new vec(numNLPorts, fill::zeros);
+    idJNL = eye(size(*JNL));
 }
 
 nlNewtonSolver::~nlNewtonSolver( ) {
@@ -86,13 +87,15 @@ void nlNewtonSolver::nlSolve( vec* inWaves,
     double iter = 0;            // # of iteration
     double alpha = 0;
 
+    *Emat_in = (myMatData->Emat)*(*inWaves);
+
     (*J).zeros();
 
     if ( firstRun ) {
         firstRun = false;
     }
     else {
-        (*x0) = (*Fmat_fNL) + (myMatData->Emat)*(*inWaves);
+        (*x0) = (*Fmat_fNL) + (*Emat_in);
     }
 
     evalNlModels( inWaves, myMatData, x0 );
@@ -141,8 +144,7 @@ void nlNewtonSolver::evalNlModels( vec* inWaves,
     }
 
     (*Fmat_fNL) = myMatData->Fmat*(*fNL);
-    (*F) = (myMatData->Emat)*(*inWaves) + (*Fmat_fNL) - (*x);
-    (*J) = (myMatData->Fmat)*(*JNL) - eye(size(*JNL));
-
+    (*F) = (*Emat_in) + (*Fmat_fNL) - (*x);
+    (*J) = (myMatData->Fmat)*(*JNL) - idJNL;
 }
 

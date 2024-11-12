@@ -136,6 +136,11 @@ protected:
     mat* J;
     /** variable to store Fmat * fNL for x0 next prediction */
     vec* Fmat_fNL;
+
+    /** variable to store Emat * inWaves */
+    vec* Emat_in;
+    mat idJNL;
+
     /** flag to detect first run of the solver for a clean first initial guess */
     bool firstRun = true;
 
