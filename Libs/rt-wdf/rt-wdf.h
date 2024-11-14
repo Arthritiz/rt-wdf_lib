@@ -102,6 +102,10 @@ public:
      */
     virtual ~wdfTree( );
 
+private:
+    double totalElapsed = 0.0;
+    int callCount = 0;
+
 protected:
     //----------------------------------------------------------------------
     /**

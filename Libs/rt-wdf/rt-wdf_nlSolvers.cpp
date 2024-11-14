@@ -28,6 +28,13 @@
 
 #include "rt-wdf_nlSolvers.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+void debugOutput(const std::string& msg) {
+    OutputDebugString(msg.c_str());
+}
+#endif
+
 //==============================================================================
 // Parent class for nlSolvers
 //==============================================================================
@@ -126,6 +133,15 @@ void nlNewtonSolver::nlSolve( vec* inWaves,
     {
         std::cout << "convergence failed" << std::endl;
     }
+
+//#ifdef _WIN32
+//    std::ostringstream oss;
+//    oss.precision(6);
+//    oss << std::scientific << normF;
+//    std::string resSN = oss.str();
+//
+//    debugOutput("iter: " + std::to_string(iter) + ", normF: " + resSN + "\n");
+//#endif
 
     (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * (*fNL);
 
