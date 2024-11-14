@@ -58,10 +58,10 @@ diodeModel::diodeModel() : nlModel( 1 ) {
 }
 
 //----------------------------------------------------------------------
-void diodeModel::calculate( vec* fNL,
-                            mat* JNL,
-                            vec* x,
-                            vec* lastX,
+void diodeModel::calculate( Wvec* fNL,
+                            Wmat* JNL,
+                            Wvec* x,
+                            Wvec* lastX,
                             int* currentPort ) {
 
     const double vd = (*x)(*currentPort);
@@ -79,10 +79,10 @@ diodeApModel::diodeApModel( ) : nlModel( 1 ) {
 }
 
 //----------------------------------------------------------------------
-void diodeApModel::calculate( vec* fNL,
-                              mat* JNL,
-                              vec* x,
-                              vec* lastX,
+void diodeApModel::calculate( Wvec* fNL,
+                              Wmat* JNL,
+                              Wvec* x,
+                              Wvec* lastX,
                               int* currentPort) {
 
     const double vd = (*x)(*currentPort);
@@ -106,10 +106,10 @@ npnEmModel::npnEmModel() : nlModel( 2 ) {
 }
 
 //----------------------------------------------------------------------
-void npnEmModel::calculate( vec* fNL,
-                            mat* JNL,
-                            vec* x,
-                            vec* lastX,
+void npnEmModel::calculate( Wvec* fNL,
+                            Wmat* JNL,
+                            Wvec* x,
+                            Wvec* lastX,
                             int* currentPort) {
 
     const double Is_BJT = 5.911e-15;
@@ -183,10 +183,10 @@ pnpEmModel::pnpEmModel(std::string modelName): nlModel(2)
     vcrit = VT_BJT * std::log(VT_BJT/(std::sqrt(2)*this->modelSpec.Is_BJT));
 }
 
-void pnpEmModel::calculate( vec* fNL,
-                            mat* JNL,
-                            vec* x,
-                            vec* lastX,
+void pnpEmModel::calculate( Wvec* fNL,
+                            Wmat* JNL,
+                            Wvec* x,
+                            Wvec* lastX,
                             int* currentPort)
 {
     for (int i = *currentPort; i < *currentPort + getNumPorts(); i++)
@@ -230,10 +230,10 @@ triDwModel::triDwModel() : nlModel( 2 ) {
 }
 
 //----------------------------------------------------------------------
-void triDwModel::calculate( vec* fNL,
-                            mat* JNL,
-                            vec* x,
-                            vec* lastX,
+void triDwModel::calculate( Wvec* fNL,
+                            Wmat* JNL,
+                            Wvec* x,
+                            Wvec* lastX,
                             int* currentPort) {
 
     const double G = 2.242E-3;

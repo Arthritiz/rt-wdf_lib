@@ -97,10 +97,10 @@ public:
      @param *currentPort     is a pointer to the first reading /
                              writing position in fNL, JNL and x.
     */
-    virtual void calculate( vec* fNL,
-                            mat* JNL,
-                            vec* x,
-                            vec* lastX,
+    virtual void calculate( Wvec* fNL,
+                            Wmat* JNL,
+                            Wvec* x,
+                            Wvec* lastX,
                             int* currentPort ) = 0;
 
     //----------------------------------------------------------------------
@@ -148,10 +148,10 @@ public:
      @param *currentPort     is a pointer to the first reading /
                              writing position in fNL, JNL and x.
     */
-    void calculate( vec* fNL,
-                    mat* JNL,
-                    vec* x,
-                    vec* lastX,
+    void calculate( Wvec* fNL,
+                    Wmat* JNL,
+                    Wvec* x,
+                    Wvec* lastX,
                     int* currentPort );
 
 };
@@ -184,10 +184,10 @@ public:
      @param *currentPort     is a pointer to the first reading /
                              writing position in fNL, JNL and x.
     */
-    void calculate( vec* fNL,
-                    mat* JNL,
-                    vec* x,
-                    vec* lastX,
+    void calculate( Wvec* fNL,
+                    Wmat* JNL,
+                    Wvec* x,
+                    Wvec* lastX,
                     int* currentPort );
 
 };
@@ -220,10 +220,10 @@ public:
      @param *currentPort     is a pointer to the first reading /
                              writing position in fNL, JNL and x.
     */
-    void calculate( vec* fNL,
-                    mat* JNL,
-                    vec* x,
-                    vec* lastX,
+    void calculate( Wvec* fNL,
+                    Wmat* JNL,
+                    Wvec* x,
+                    Wvec* lastX,
                     int* currentPort );
 
 };
@@ -233,10 +233,10 @@ class pnpEmModel: public nlModel
 public:
     pnpEmModel(std::string modelName);
 
-    void calculate( vec* fNL,
-                    mat* JNL,
-                    vec* x,
-                    vec* lastX,
+    void calculate( Wvec* fNL,
+                    Wmat* JNL,
+                    Wvec* x,
+                    Wvec* lastX,
                     int* currentPort );
 private:
     class ModelSpec
@@ -291,10 +291,10 @@ public:
      @param *currentPort     is a pointer to the first reading /
                              writing position in fNL, JNL and x.
     */
-    void calculate( vec* fNL,
-                    mat* JNL,
-                    vec* x,
-                    vec* lastX,
+    void calculate( Wvec* fNL,
+                    Wmat* JNL,
+                    Wvec* x,
+                    Wvec* lastX,
                     int* currentPort );
 
 };

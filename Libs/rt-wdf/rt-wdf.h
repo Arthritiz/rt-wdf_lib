@@ -124,13 +124,13 @@ protected:
     /**
      Pointer to a vector of ascending waves towards the root.
      */
-    std::unique_ptr<vec> ascendingWaves;
+    std::unique_ptr<Wvec> ascendingWaves;
 
     //----------------------------------------------------------------------
     /**
      Pointer to a vector of descending waves from the root.
      */
-    std::unique_ptr<vec> descendingWaves;
+    std::unique_ptr<Wvec> descendingWaves;
 
     //----------------------------------------------------------------------
     /**
@@ -335,8 +335,8 @@ public:
                                 waves that leave the root afterprocessing into
                                 the subtrees
      */
-    virtual void processAscendingWaves( vec* ascendingWaves,
-                                        vec* descendingWaves ) = 0;
+    virtual void processAscendingWaves( Wvec* ascendingWaves,
+                                        Wvec* descendingWaves ) = 0;
 
     //----------------------------------------------------------------------
     /**
@@ -410,8 +410,8 @@ public:
                                 waves that leave the root afterprocessing into
                                 the subtrees
      */
-    virtual void processAscendingWaves( vec* ascendingWaves,
-                                        vec* descendingWaves );
+    virtual void processAscendingWaves( Wvec* ascendingWaves,
+                                        Wvec* descendingWaves );
 
     //----------------------------------------------------------------------
     /**
@@ -500,8 +500,8 @@ public:
                                 waves that leave the root afterprocessing into
                                 the subtrees
      */
-    virtual void processAscendingWaves( vec* ascendingWaves,
-                                        vec* descendingWaves );
+    virtual void processAscendingWaves( Wvec* ascendingWaves,
+                                        Wvec* descendingWaves );
 
     //----------------------------------------------------------------------
     /**
@@ -569,8 +569,8 @@ public:
                                 waves that leave the root afterprocessing into
                                 the subtrees
      */
-    virtual void processAscendingWaves( vec* ascendingWaves,
-                                        vec* descendingWaves );
+    virtual void processAscendingWaves( Wvec* ascendingWaves,
+                                        Wvec* descendingWaves );
 
     //----------------------------------------------------------------------
     /**
@@ -978,7 +978,7 @@ protected:
      Size:  (childNodeCount+1) x (childNodeCount+1)
             ("+1" for upfacing port)
      */
-    std::unique_ptr<mat> S;
+    std::unique_ptr<Wmat> S;
 
 };
 
@@ -1713,8 +1713,8 @@ public:
                                 waves. Needs to be incremented by numPorts in
                                 the node's implementation.
      */
-    virtual void calculateDownB( vec* ascendingWaves,
-                                 vec* descendingWaves,
+    virtual void calculateDownB( Wvec* ascendingWaves,
+                                 Wvec* descendingWaves,
                                  size_t* portIndex ) = 0;
 
     //----------------------------------------------------------------------
@@ -1774,8 +1774,8 @@ public:
                                 waves. Needs to be incremented by numPorts in
                                 the node's implementation.
      */
-    virtual void calculateDownB( vec* ascendingWaves,
-                                 vec* descendingWaves,
+    virtual void calculateDownB( Wvec* ascendingWaves,
+                                 Wvec* descendingWaves,
                                  size_t* portIndex );
 
     //----------------------------------------------------------------------
@@ -1852,8 +1852,8 @@ public:
                                 waves. Needs to be incremented by numPorts in
                                 the node's implementation.
     */
-    virtual void calculateDownB( vec* ascendingWaves,
-                                 vec* descendingWaves,
+    virtual void calculateDownB( Wvec* ascendingWaves,
+                                 Wvec* descendingWaves,
                                  size_t* portIndex );
 
     //----------------------------------------------------------------------
@@ -1939,8 +1939,8 @@ public:
                                 waves. Needs to be incremented by numPorts in
                                 the node's implementation.
     */
-    virtual void calculateDownB( vec* ascendingWaves,
-                                 vec* descendingWaves,
+    virtual void calculateDownB( Wvec* ascendingWaves,
+                                 Wvec* descendingWaves,
                                  size_t* portIndex );
 
     //----------------------------------------------------------------------
@@ -2008,8 +2008,8 @@ public:
                                 waves. Needs to be incremented by numPorts in
                                 the node's implementation.
     */
-    virtual void calculateDownB( vec* ascendingWaves,
-                                 vec* descendingWaves,
+    virtual void calculateDownB( Wvec* ascendingWaves,
+                                 Wvec* descendingWaves,
                                  size_t* portIndex );
 
     //----------------------------------------------------------------------
@@ -2067,8 +2067,8 @@ public:
                                 waves. Needs to be incremented by numPorts in
                                 the node's implementation.
     */
-    virtual void calculateDownB( vec* ascendingWaves,
-                                 vec* descendingWaves,
+    virtual void calculateDownB( Wvec* ascendingWaves,
+                                 Wvec* descendingWaves,
                                  size_t* portIndex );
 
     //----------------------------------------------------------------------
@@ -2122,8 +2122,8 @@ public:
                                 waves. Needs to be incremented by numPorts in
                                 the node's implementation.
     */
-    virtual void calculateDownB( vec* ascendingWaves,
-                                 vec* descendingWaves,
+    virtual void calculateDownB( Wvec* ascendingWaves,
+                                 Wvec* descendingWaves,
                                  size_t* portIndex );
 
     //----------------------------------------------------------------------

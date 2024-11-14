@@ -29,10 +29,7 @@
 #ifndef RTWDF_TYPES_H_INCLUDED
 #define RTWDF_TYPES_H_INCLUDED
 
-
-#include <armadillo>
-using namespace arma;
-
+#include "rt-wdf_utils.h"
 
 //==============================================================================
 /** A struct that holds matrices for R-type and NL root nodes.
@@ -47,32 +44,32 @@ typedef struct matData{
     /** S-Matrix as used in wdfRootRtype.
         Size: (numBrPorts) x (numBrPorts)
     */
-    mat Smat;
+    Wmat Smat;
 
     /** E-Matrix as used in wdfRootNL.
         Size: (numNlPorts) x (numBrPorts)
     */
-    mat Emat;
+    Wmat Emat;
 
     /** F-Matrix as used in wdfRootNL.
         Size: (numNlPorts) x (numNlPorts)
     */
-    mat Fmat;
+    Wmat Fmat;
 
     /** M-Matrix as used in wdfRootNL.
         Size: (numBrPorts) x (numBrPorts)
     */
-    mat Mmat;
+    Wmat Mmat;
 
     /** N-Matrix as used in wdfRootNL.
         Size: (numBrPorts) x (numNlPorts)
     */
-    mat Nmat;
+    Wmat Nmat;
 
     /** T-Matrix as used in wdfRootLinear and wdfRootMixed.
      Size: (numBrPorts) x (numNlPorts)
      */
-    mat Tmat;
+    Wmat Tmat;
 
 } matData;
 

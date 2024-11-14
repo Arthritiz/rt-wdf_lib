@@ -67,8 +67,8 @@ void wdfTree::cycleWave( ) {
 
 //----------------------------------------------------------------------
 void wdfTree::initTree( ) {
-    ascendingWaves.reset( new vec( subtreeCount ) );
-    descendingWaves.reset( new vec( subtreeCount ) );
+    ascendingWaves.reset( new Wvec( subtreeCount ) );
+    descendingWaves.reset( new Wvec( subtreeCount ) );
 
     for( unsigned int i = 0; i < subtreeCount; i++ ) {
         subtreeEntryNodes[i]->setParentInChildren( );
@@ -148,8 +148,8 @@ wdfRootRtype::~wdfRootRtype( ) {
 }
 
 //----------------------------------------------------------------------
-void wdfRootRtype::processAscendingWaves( vec* ascendingWaves,
-                                          vec* descendingWaves ) {
+void wdfRootRtype::processAscendingWaves( Wvec* ascendingWaves,
+                                          Wvec* descendingWaves ) {
     (*descendingWaves) = rootMatrixData->Smat * (*ascendingWaves);
 }
 
@@ -188,8 +188,8 @@ wdfRootNL::~wdfRootNL( ) {
 }
 
 //----------------------------------------------------------------------
-void wdfRootNL::processAscendingWaves( vec* ascendingWaves,
-                                       vec* descendingWaves ) {
+void wdfRootNL::processAscendingWaves( Wvec* ascendingWaves,
+                                       Wvec* descendingWaves ) {
     NlSolver->nlSolve( ascendingWaves, descendingWaves );
 }
 
@@ -222,8 +222,8 @@ void wdfRootSimple::setPortResistances( double * Rp ) {
 }
 
 //----------------------------------------------------------------------
-void wdfRootSimple::processAscendingWaves( vec* ascendingWaves,
-                                           vec* descendingWaves ) {
+void wdfRootSimple::processAscendingWaves( Wvec* ascendingWaves,
+                                           Wvec* descendingWaves ) {
     size_t idx = 0;
     rootElement->calculateDownB( ascendingWaves, descendingWaves, &idx );
 }
@@ -344,7 +344,7 @@ wdfTerminatedAdapter::wdfTerminatedAdapter(std::vector<wdfTreeNode*> childrenIn)
 #pragma mark Terminated R-type Adapter
 //==============================================================================
 wdfTerminatedRtype::wdfTerminatedRtype( std::vector<wdfTreeNode*> childrenIn ) : wdfTerminatedAdapter( childrenIn ) {
-    S.reset( new mat( childrenIn.size()+1, childrenIn.size()+1 ) );
+    S.reset( new Wmat(  childrenIn.size()+1, childrenIn.size()+1 ) );
 }
 
 
@@ -373,7 +373,7 @@ wdfTerminatedRtype::~wdfTerminatedRtype( ) {
 //----------------------------------------------------------------------
 double wdfTerminatedRtype::calculateUpB( )
 {
-    colvec inWaves( childrenNodes.size()+1 );
+    arma::colvec inWaves( childrenNodes.size()+1 );
     inWaves(0) = 0;
     for( unsigned int i = 0; i < childrenNodes.size(); i++ ) {
         inWaves(i+1) = downPorts[i]->a;
@@ -386,13 +386,13 @@ double wdfTerminatedRtype::calculateUpB( )
 //----------------------------------------------------------------------
 void wdfTerminatedRtype::calculateDownB( double descendingWave )
 {
-    colvec inWaves( childrenNodes.size()+1 );
+    arma::colvec inWaves( childrenNodes.size()+1 );
     inWaves(0) = descendingWave;
     for( unsigned int i = 0; i < childrenNodes.size(); i++ ) {
         inWaves(i+1) = downPorts[i]->a;
     }
 
-    colvec downWaves = (*S) * inWaves;
+    arma::colvec downWaves = (*S) * inWaves;
 
     for( unsigned int i = 0; i < childrenNodes.size(); i++ ) {
         downPorts[i]->b = downWaves(i+1);
@@ -743,8 +743,8 @@ wdfUnterminatedSwitch::wdfUnterminatedSwitch( int position ) : wdfRootNode( 1 ),
 }
 
 //----------------------------------------------------------------------
-void wdfUnterminatedSwitch::calculateDownB( vec* ascendingWaves,
-                                            vec* descendingWaves,
+void wdfUnterminatedSwitch::calculateDownB( Wvec* ascendingWaves,
+                                            Wvec* descendingWaves,
                                             size_t* portIndex ) {
     size_t idx   = (*portIndex);
     (*portIndex) = idx+numPorts;
@@ -782,8 +782,8 @@ wdfUnterminatedCap::wdfUnterminatedCap(double C,
 
 
 //----------------------------------------------------------------------
-void wdfUnterminatedCap::calculateDownB( vec* ascendingWaves,
-                                         vec* descendingWaves,
+void wdfUnterminatedCap::calculateDownB( Wvec* ascendingWaves,
+                                         Wvec* descendingWaves,
                                          size_t* portIndex) {
     descendingWaves->at(*portIndex) = reflectionCoeff * prevB - reflectionCoeff * ascendingWaves->at(*portIndex) + prevA;
     prevB = descendingWaves->at(*portIndex);
@@ -814,8 +814,8 @@ wdfUnterminatedInd::wdfUnterminatedInd( double L,
 
 
 //----------------------------------------------------------------------
-void wdfUnterminatedInd::calculateDownB( vec* ascendingWaves,
-                                         vec* descendingWaves,
+void wdfUnterminatedInd::calculateDownB( Wvec* ascendingWaves,
+                                         Wvec* descendingWaves,
                                          size_t* portIndex) {
     descendingWaves->at(*portIndex) = -reflectionCoeff * prevB - reflectionCoeff * ascendingWaves->at(*portIndex) - prevA;
     prevB = descendingWaves->at(*portIndex);
@@ -842,8 +842,8 @@ wdfUnterminatedRes::wdfUnterminatedRes( double R ) : wdfRootNode(1),
 }
 
 //----------------------------------------------------------------------
-void wdfUnterminatedRes::calculateDownB( vec* ascendingWaves,
-                                         vec* descendingWaves,
+void wdfUnterminatedRes::calculateDownB( Wvec* ascendingWaves,
+                                         Wvec* descendingWaves,
                                          size_t* portIndex) {
     descendingWaves->at(*portIndex) = reflectionCoeff * ascendingWaves->at(*portIndex);
     (*portIndex) += numPorts;
@@ -868,8 +868,8 @@ wdfIdealVSource::wdfIdealVSource( double Vs ) : wdfRootNode(1),
 }
 
 //----------------------------------------------------------------------
-void wdfIdealVSource::calculateDownB( vec* ascendingWaves,
-                                            vec* descendingWaves,
+void wdfIdealVSource::calculateDownB( Wvec* ascendingWaves,
+                                            Wvec* descendingWaves,
                                             size_t* portIndex) {
     descendingWaves->at(*portIndex) = 2 * Vs - ascendingWaves->at(*portIndex);
     (*portIndex) += numPorts;
@@ -893,8 +893,8 @@ wdfIdealCSource::wdfIdealCSource( double Is ) : wdfRootNode(1),
 }
 
 //----------------------------------------------------------------------
-void wdfIdealCSource::calculateDownB( vec* ascendingWaves,
-                                      vec* descendingWaves,
+void wdfIdealCSource::calculateDownB( Wvec* ascendingWaves,
+                                      Wvec* descendingWaves,
                                       size_t* portIndex) {
     descendingWaves->at(*portIndex) = 2 * Rp * Is + ascendingWaves->at(*portIndex);
     (*portIndex) += numPorts;

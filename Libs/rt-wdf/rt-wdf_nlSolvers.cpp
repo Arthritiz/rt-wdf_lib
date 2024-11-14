@@ -64,13 +64,13 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
         numNLPorts += model->getNumPorts();
     }
 
-    x0       = new vec(numNLPorts, fill::zeros);
-    F        = new vec(numNLPorts, fill::zeros);
-    J        = new mat(numNLPorts,numNLPorts, fill::zeros);
-    fNL      = new vec(numNLPorts, fill::zeros);
-    JNL      = new mat(numNLPorts,numNLPorts, fill::zeros);
-    Fmat_fNL = new vec(numNLPorts, fill::zeros);
-    Emat_in = new vec(numNLPorts, fill::zeros);
+    x0       = new Wvec( numNLPorts, arma::fill::zeros);
+    F        = new Wvec( numNLPorts, arma::fill::zeros);
+    J        = new Wmat( numNLPorts,numNLPorts, arma::fill::zeros);
+    fNL      = new Wvec( numNLPorts, arma::fill::zeros);
+    JNL      = new Wmat( numNLPorts,numNLPorts, arma::fill::zeros);
+    Fmat_fNL = new Wvec( numNLPorts, arma::fill::zeros);
+    Emat_in = new Wvec( numNLPorts, arma::fill::zeros);
     idJNL = eye(size(*JNL));
 }
 
@@ -88,8 +88,8 @@ nlNewtonSolver::~nlNewtonSolver( ) {
 }
 
 //----------------------------------------------------------------------
-void nlNewtonSolver::nlSolve( vec* inWaves,
-                          vec* outWaves ) {
+void nlNewtonSolver::nlSolve( Wvec* inWaves,
+                          Wvec* outWaves ) {
 
     double iter = 0;            // # of iteration
     double alpha = 0;
@@ -107,20 +107,20 @@ void nlNewtonSolver::nlSolve( vec* inWaves,
 
     evalNlModels( inWaves, myMatData, x0 );
 
-    double normF = norm(*F);
+    double normF = arma::norm(*F);
     //printf("iter alpha         ||F||_2\n");
     //printf(" %3g %9.2e %14.7e\n", iter, alpha, normF);
 
-    vec xnew;
+    Wvec xnew;
     double normFnew;
 
     while ( (normF >= TOL) && (iter < ITMAX) )
     {
-        vec p = - (*J).i() * (*F);
+        Wvec p = - (*J).i() * (*F);
         alpha = 1;
         xnew = (*x0) + alpha * p;
         evalNlModels(inWaves, myMatData, &xnew);
-        normFnew = norm(*F);
+        normFnew = arma::norm(*F);
 
         (*x0) = xnew;
         normF = normFnew;
@@ -148,9 +148,9 @@ void nlNewtonSolver::nlSolve( vec* inWaves,
 }
 
 //----------------------------------------------------------------------
-void nlNewtonSolver::evalNlModels( vec* inWaves,
+void nlNewtonSolver::evalNlModels( Wvec* inWaves,
                                matData* myMatData,
-                               vec* x ) {
+                               Wvec* x ) {
     int currentPort = 0;
     (*JNL).zeros();
 

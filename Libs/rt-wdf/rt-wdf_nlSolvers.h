@@ -101,8 +101,8 @@ public:
      @param *outWaves           is a pointer to a vector of outgoing waves
      @param *myMatData          is a pointer to the E,F,M,N (and S) matrices
     */
-    virtual void nlSolve( vec* inWaves,
-                          vec* outWaves ) = 0;
+    virtual void nlSolve( Wvec* inWaves,
+                          Wvec* outWaves ) = 0;
 
     //----------------------------------------------------------------------
     /**
@@ -125,21 +125,21 @@ protected:
     /** struct which holds all root NLSS matrices including variable conversion */
     matData* myMatData;
     /** latest guess to solve the NLSS system */
-    vec* x0;
+    Wvec* x0;
     /** result of the NL equations */
-    vec* fNL;
+    Wvec* fNL;
     /** Jacobian of the NL equations */
-    mat* JNL;
+    Wmat* JNL;
     /** F vector for newton method */
-    vec* F;
+    Wvec* F;
     /** J matrix for the newton method */
-    mat* J;
+    Wmat* J;
     /** variable to store Fmat * fNL for x0 next prediction */
-    vec* Fmat_fNL;
+    Wvec* Fmat_fNL;
 
     /** variable to store Emat * inWaves */
-    vec* Emat_in;
-    mat idJNL;
+    Wvec* Emat_in;
+    Wmat idJNL;
 
     /** flag to detect first run of the solver for a clean first initial guess */
     bool firstRun = true;
@@ -181,8 +181,8 @@ public:
      @param inWaves             is a pointer to a vector of incoming waves
      @param outWaves            is a pointer to a vector of outgoing waves
     */
-    void nlSolve( vec* inWaves,
-                  vec* outWaves );
+    void nlSolve( Wvec* inWaves,
+                  Wvec* outWaves );
 
     //----------------------------------------------------------------------
     /**
@@ -196,7 +196,7 @@ public:
      @param *myMatData          is a pointer to the E,F,M,N matrices
      @param *x                  is a pointer to the input values x
     */
-    void evalNlModels(vec* inWaves, matData* myMatData, vec* x);
+    void evalNlModels(Wvec* inWaves, matData* myMatData, Wvec* x);
 
 };
 
