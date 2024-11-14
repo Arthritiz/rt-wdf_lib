@@ -71,7 +71,7 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
     JNL      = new Wmat( numNLPorts,numNLPorts, arma::fill::zeros);
     Fmat_fNL = new Wvec( numNLPorts, arma::fill::zeros);
     Emat_in = new Wvec( numNLPorts, arma::fill::zeros);
-    idJNL = eye(size(*JNL));
+    idJNL = eye<Wmat>(size(*JNL));
 }
 
 nlNewtonSolver::~nlNewtonSolver( ) {

@@ -7,11 +7,6 @@
 
 #include <armadillo>
 
-// float precision
-using WvecF = arma::fvec;
-using WmatF = arma::fmat;
-
-// double precision
 using Wvec = arma::vec;
 using Wmat = arma::mat;
 
