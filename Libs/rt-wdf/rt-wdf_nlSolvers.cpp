@@ -71,7 +71,7 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
     JNL      = new Wmat( numNLPorts,numNLPorts, arma::fill::zeros);
     Fmat_fNL = new Wvec( numNLPorts, arma::fill::zeros);
     Emat_in = new Wvec( numNLPorts, arma::fill::zeros);
-    idJNL = eye<Wmat>(size(*JNL));
+    idJNL = arma::eye<Wmat>(size(*JNL));
 }
 
 nlNewtonSolver::~nlNewtonSolver( ) {
@@ -91,8 +91,8 @@ nlNewtonSolver::~nlNewtonSolver( ) {
 void nlNewtonSolver::nlSolve( Wvec* inWaves,
                           Wvec* outWaves ) {
 
-    double iter = 0;            // # of iteration
-    double alpha = 0;
+    int iter = 0;            // # of iteration
+    FloatType alpha = 0;
 
     *Emat_in = (myMatData->Emat)*(*inWaves);
 
@@ -107,12 +107,12 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 
     evalNlModels( inWaves, myMatData, x0 );
 
-    double normF = arma::norm(*F);
+    FloatType normF = arma::norm(*F);
     //printf("iter alpha         ||F||_2\n");
     //printf(" %3g %9.2e %14.7e\n", iter, alpha, normF);
 
     Wvec xnew;
-    double normFnew;
+    FloatType normFnew;
 
     while ( (normF >= TOL) && (iter < ITMAX) )
     {

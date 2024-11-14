@@ -243,25 +243,25 @@ private:
     {
     public:
         ModelSpec() = default;
-        ModelSpec(double Is_BJT, double BETAF, double BETAR): Is_BJT(Is_BJT), BETAF(BETAF), BETAR(BETAR)
+        ModelSpec(FloatType Is_BJT, FloatType BETAF, FloatType BETAR): Is_BJT(Is_BJT), BETAF(BETAF), BETAR(BETAR)
         {
             ALPHAF = BETAF/(1.0+BETAF);
             ALPHAR = BETAR/(1.0+BETAR);
         }
 
-        double Is_BJT;
-        double BETAF;
-        double BETAR;
+        FloatType Is_BJT;
+        FloatType BETAF;
+        FloatType BETAR;
 
-        double ALPHAF;
-        double ALPHAR;
+        FloatType ALPHAF;
+        FloatType ALPHAR;
     };
 
     static const std::map<std::string, ModelSpec> modelSpecs;
 
-    double limitStep(double vnew, double vold);
+    FloatType limitStep(FloatType vnew, FloatType vold);
     ModelSpec modelSpec;
-    double vcrit;
+    FloatType vcrit;
 };
 
 //==============================================================================

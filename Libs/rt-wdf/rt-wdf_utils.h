@@ -7,7 +7,12 @@
 
 #include <armadillo>
 
-using Wvec = arma::vec;
-using Wmat = arma::mat;
+//using FloatType = double;
+//using Wvec = arma::vec;
+//using Wmat = arma::mat;
+
+using FloatType = float;
+using Wvec = arma::fvec;
+using Wmat = arma::fmat;
 
 #endif //RT_WDF_UTILS_H

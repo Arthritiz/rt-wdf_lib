@@ -151,8 +151,8 @@ const std::map<std::string, pnpEmModel::ModelSpec> pnpEmModel::modelSpecs = {
     {"AC128-B", ModelSpec(120.8e-9, 120, 20)},
 };
 
-double pnpEmModel::limitStep(double vnew, double vold) {
-    double arg;
+FloatType pnpEmModel::limitStep(FloatType vnew, FloatType vold) {
+    FloatType arg;
 
     if ((vnew > vcrit) && (abs(vnew - vold) > (VT_BJT + VT_BJT))) {
         if (vold > 0) {
@@ -194,14 +194,14 @@ void pnpEmModel::calculate( Wvec* fNL,
         (*x)(i) = limitStep((*x)(i), (*lastX)(i));
     }
 
-    const double vEB = (*x)(*currentPort);
-    const double vCB = (*x)((*currentPort)+1);
+    const FloatType vEB = (*x)(*currentPort);
+    const FloatType vCB = (*x)((*currentPort)+1);
 
-    const double vEB_o_VT_BJT = vEB/VT_BJT;
-    const double vCB_o_VT_BJT = vCB/VT_BJT;
-    const double Is_BJT_o_VT_BJT = modelSpec.Is_BJT/VT_BJT;
-    const double Is_BJT_o_ALPHAR = modelSpec.Is_BJT/modelSpec.ALPHAR;
-    const double Is_BJT_o_ALPHAF = modelSpec.Is_BJT/modelSpec.ALPHAF;
+    const FloatType vEB_o_VT_BJT = vEB/VT_BJT;
+    const FloatType vCB_o_VT_BJT = vCB/VT_BJT;
+    const FloatType Is_BJT_o_VT_BJT = modelSpec.Is_BJT/VT_BJT;
+    const FloatType Is_BJT_o_ALPHAR = modelSpec.Is_BJT/modelSpec.ALPHAR;
+    const FloatType Is_BJT_o_ALPHAF = modelSpec.Is_BJT/modelSpec.ALPHAF;
 
     // i_eb
     (*fNL)(*currentPort) = (Is_BJT_o_ALPHAF)*(exp(vEB_o_VT_BJT)-1) - modelSpec.Is_BJT*(exp(vCB_o_VT_BJT)-1);
