@@ -141,6 +141,9 @@ protected:
     Wvec* Emat_in;
     Wmat idJNL;
 
+    Wvec* x0Max = nullptr;
+    Wvec* x0Min = nullptr;
+
     /** flag to detect first run of the solver for a clean first initial guess */
     bool firstRun = true;
 
@@ -200,5 +203,21 @@ public:
 
 };
 
+class nlTabSolver: public nlSolver
+{
+    matData* myMatData;
+
+public:
+    nlTabSolver( std::vector<nlModel*> nlList,
+                matData* myMatData,
+                std::vector<std::tuple<double, double, int>> mapMeta );
+
+    ~nlTabSolver();
+
+    void resetTab();
+
+    void nlSolve( Wvec* inWaves,
+                  Wvec* outWaves );
+};
 
 #endif  // RTWDF_NLSOLVERS_H_INCLUDED

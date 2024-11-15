@@ -94,13 +94,10 @@ void diodeApModel::calculate( Wvec* fNL,
     (*currentPort) = (*currentPort)+getNumPorts();
 }
 
-
 //==============================================================================
 // Transistor Models using Ebers-Moll equations
 // ("Large-signal behavior of junction transistors")
 //==============================================================================
-#define VT_BJT      0.02585
-
 npnEmModel::npnEmModel() : nlModel( 2 ) {
 
 }
@@ -181,6 +178,9 @@ pnpEmModel::pnpEmModel(std::string modelName): nlModel(2)
     this->modelSpec = iter->second;
 
     vcrit = VT_BJT * std::log(VT_BJT/(std::sqrt(2)*this->modelSpec.Is_BJT));
+    Is_BJT_o_VT_BJT = modelSpec.Is_BJT/VT_BJT;
+    Is_BJT_o_ALPHAR = modelSpec.Is_BJT/modelSpec.ALPHAR;
+    Is_BJT_o_ALPHAF = modelSpec.Is_BJT/modelSpec.ALPHAF;
 }
 
 void pnpEmModel::calculate( Wvec* fNL,
@@ -194,14 +194,8 @@ void pnpEmModel::calculate( Wvec* fNL,
         (*x)(i) = limitStep((*x)(i), (*lastX)(i));
     }
 
-    const FloatType vEB = (*x)(*currentPort);
-    const FloatType vCB = (*x)((*currentPort)+1);
-
-    const FloatType vEB_o_VT_BJT = vEB/VT_BJT;
-    const FloatType vCB_o_VT_BJT = vCB/VT_BJT;
-    const FloatType Is_BJT_o_VT_BJT = modelSpec.Is_BJT/VT_BJT;
-    const FloatType Is_BJT_o_ALPHAR = modelSpec.Is_BJT/modelSpec.ALPHAR;
-    const FloatType Is_BJT_o_ALPHAF = modelSpec.Is_BJT/modelSpec.ALPHAF;
+    const FloatType vEB_o_VT_BJT = (*x)(*currentPort)/VT_BJT;
+    const FloatType vCB_o_VT_BJT = (*x)((*currentPort)+1)/VT_BJT;
 
     // i_eb
     (*fNL)(*currentPort) = (Is_BJT_o_ALPHAF)*(exp(vEB_o_VT_BJT)-1) - modelSpec.Is_BJT*(exp(vCB_o_VT_BJT)-1);
@@ -218,6 +212,11 @@ void pnpEmModel::calculate( Wvec* fNL,
     (*JNL)(((*currentPort)+1),((*currentPort)+1)) = (Is_BJT_o_ALPHAR/VT_BJT)*exp(vCB_o_VT_BJT);
 
     (*currentPort) = (*currentPort)+getNumPorts();
+}
+
+std::vector<std::pair<double, double>> pnpEmModel::getVIPairList(const std::tuple<double, double, int>&)
+{
+    return std::vector<std::pair<double, double>>{};
 }
 
 //==============================================================================

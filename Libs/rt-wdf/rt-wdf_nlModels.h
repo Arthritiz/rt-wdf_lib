@@ -113,6 +113,8 @@ public:
     */
     int getNumPorts( );
 
+    virtual std::vector<std::pair<double, double>> getVIPairList(const std::tuple<double, double, int>&) { return std::vector<std::pair<double, double>>{}; };
+
 private:
     //----------------------------------------------------------------------
     /** Stores the number of ports of a model */
@@ -194,6 +196,8 @@ public:
 
 
 //==============================================================================
+#define VT_BJT      0.02585
+
 class npnEmModel : public nlModel {
 
 public:
@@ -238,6 +242,8 @@ public:
                     Wvec* x,
                     Wvec* lastX,
                     int* currentPort );
+
+    std::vector<std::pair<double, double>> getVIPairList(const std::tuple<double, double, int>&) override;
 private:
     class ModelSpec
     {
@@ -262,6 +268,10 @@ private:
     FloatType limitStep(FloatType vnew, FloatType vold);
     ModelSpec modelSpec;
     FloatType vcrit;
+
+    FloatType Is_BJT_o_VT_BJT;
+    FloatType Is_BJT_o_ALPHAR;
+    FloatType Is_BJT_o_ALPHAF;
 };
 
 //==============================================================================
@@ -296,7 +306,6 @@ public:
                     Wvec* x,
                     Wvec* lastX,
                     int* currentPort );
-
 };
 
 

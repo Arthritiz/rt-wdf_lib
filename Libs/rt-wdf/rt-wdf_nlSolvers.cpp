@@ -85,6 +85,12 @@ nlNewtonSolver::~nlNewtonSolver( ) {
     delete fNL;
     delete JNL;
     delete Fmat_fNL;
+
+    x0Max->print("x0Max");
+    x0Min->print("x0Min");
+
+    delete x0Max;
+    delete x0Min;
 }
 
 //----------------------------------------------------------------------
@@ -134,6 +140,22 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
         std::cout << "convergence failed" << std::endl;
     }
 
+    // if (x0Max == nullptr)
+    // {
+    //     x0Max = new Wvec(arma::size(*x0));
+    //     x0Min = new Wvec(arma::size(*x0));
+    //
+    //     *x0Max = *x0;
+    //     *x0Min = *x0;
+    // } else
+    // {
+    //     for (int i = 0; i < (*x0).size(); i++)
+    //     {
+    //         (*x0Max)(i) = std::max( (*x0Max)(i), (*x0)(i) );
+    //         (*x0Min)(i) = std::min( (*x0Min)(i), (*x0)(i) );
+    //     }
+    // }
+
 //#ifdef _WIN32
 //    std::ostringstream oss;
 //    oss.precision(6);
@@ -164,3 +186,33 @@ void nlNewtonSolver::evalNlModels( Wvec* inWaves,
     (*J) = (myMatData->Fmat)*(*JNL) - idJNL;
 }
 
+nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData, std::vector<std::tuple<double, double, int>> mapMeta)
+{
+    nlModels = nlList;
+
+    numNLPorts = 0;
+    for ( nlModel* model : nlModels ) {
+        numNLPorts += model->getNumPorts();
+    }
+
+    std::vector<std::vector<std::pair<double, double>>> viPairLists(numNLPorts);
+    for (int i = 0; i < numNLPorts; i++)
+    {
+        //viPairLists[i] = nlModels[i]->getVIPairList(mapMeta[i]);
+    }
+}
+
+nlTabSolver::~nlTabSolver()
+{
+
+}
+
+void nlTabSolver::resetTab()
+{
+
+}
+
+void nlTabSolver::nlSolve( Wvec* inWaves,
+                          Wvec* outWaves )
+{
+}
