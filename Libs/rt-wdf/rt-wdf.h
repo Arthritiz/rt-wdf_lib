@@ -459,7 +459,8 @@ private:
      Pointer to a NL Solver which solves the implicit scattering loop
      around the non-linearities in the root.
      */
-    std::unique_ptr<nlNewtonSolver> NlSolver;
+    //std::unique_ptr<nlNewtonSolver> NlSolver;
+    std::unique_ptr<nlSolver> NlSolver;
 
 public:
     //----------------------------------------------------------------------

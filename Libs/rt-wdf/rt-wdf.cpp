@@ -172,8 +172,15 @@ wdfRootNL::wdfRootNL( int numSubtrees,
                                          numSubtrees( numSubtrees ) {
     rootMatrixData.reset( new matData );
 
+    std::vector<std::tuple<double, double, int>> ga = {
+        {0.0, 1.0, 2},
+        {0.0, 1.0, 2},
+        {0.0, 1.0, 3},
+        {0.0, 1.0, 4}};
+
     // TODO make ENUM / MAP variant with different nlSolvers (!!)
     NlSolver.reset( new nlNewtonSolver( nlList, rootMatrixData.get() ) );
+    //NlSolver.reset( new nlTabSolver( nlList, rootMatrixData.get()) );
     int numNonlinearities = NlSolver->getNumPorts( );
 
     rootMatrixData->Smat.set_size( numSubtrees+numNonlinearities, numSubtrees+numNonlinearities );

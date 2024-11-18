@@ -113,7 +113,7 @@ public:
     */
     int getNumPorts( );
 
-    virtual std::vector<std::pair<double, double>> getVIPairList(const std::tuple<double, double, int>&) { return std::vector<std::pair<double, double>>{}; };
+    virtual void getCurrents(const Wmat& vVec, Wmat& iVec, int curCol, int startIndex) {};
 
 private:
     //----------------------------------------------------------------------
@@ -243,7 +243,7 @@ public:
                     Wvec* lastX,
                     int* currentPort );
 
-    std::vector<std::pair<double, double>> getVIPairList(const std::tuple<double, double, int>&) override;
+    void getCurrents(const Wmat& vVec, Wmat& iVec, int curCol, int startIndex) override;
 private:
     class ModelSpec
     {

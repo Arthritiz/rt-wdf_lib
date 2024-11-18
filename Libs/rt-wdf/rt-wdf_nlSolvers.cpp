@@ -89,8 +89,20 @@ nlNewtonSolver::~nlNewtonSolver( ) {
     x0Max->print("x0Max");
     x0Min->print("x0Min");
 
+    fNLMax->print("fNLMax");
+    fNLMin->print("fNLMin");
+
     delete x0Max;
     delete x0Min;
+
+    delete fNLMax;
+    delete fNLMin;
+
+    std::cout << "totalIter: " << totalIter << ", callCount: " << callCount << std::endl;
+    std::cout << "avgIter(vanilla): " << totalIter/(float)callCount << std::endl;
+
+    avgIter = (avgIter * callCount/STEP + totalSubIter/(float)STEP)/(callCount/(float)STEP);
+    std::cout << "avgIter(my way): " << avgIter << std::endl;
 }
 
 //----------------------------------------------------------------------
@@ -140,21 +152,47 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
         std::cout << "convergence failed" << std::endl;
     }
 
-    // if (x0Max == nullptr)
-    // {
-    //     x0Max = new Wvec(arma::size(*x0));
-    //     x0Min = new Wvec(arma::size(*x0));
-    //
-    //     *x0Max = *x0;
-    //     *x0Min = *x0;
-    // } else
-    // {
-    //     for (int i = 0; i < (*x0).size(); i++)
-    //     {
-    //         (*x0Max)(i) = std::max( (*x0Max)(i), (*x0)(i) );
-    //         (*x0Min)(i) = std::min( (*x0Min)(i), (*x0)(i) );
-    //     }
-    // }
+    totalIter += iter;
+    callCount += 1;
+    totalSubIter += iter;
+
+    if ( 0 == callCount % STEP )
+    {
+        avgIter = (avgIter * (callCount/STEP - 1) + totalSubIter/(float)STEP)/(callCount/STEP);
+        totalSubIter = 0;
+    }
+
+    if (x0Max == nullptr)
+    {
+        x0Max = new Wvec(arma::size(*x0));
+        x0Min = new Wvec(arma::size(*x0));
+
+        *x0Max = *x0;
+        *x0Min = *x0;
+    } else
+    {
+        for (int i = 0; i < (*x0).size(); i++)
+        {
+            (*x0Max)(i) = std::max( (*x0Max)(i), (*x0)(i) );
+            (*x0Min)(i) = std::min( (*x0Min)(i), (*x0)(i) );
+        }
+    }
+
+    if (fNLMax == nullptr)
+    {
+        fNLMax = new Wvec(arma::size(*fNL));
+        fNLMin = new Wvec(arma::size(*fNL));
+
+        *fNLMax = *fNL;
+        *fNLMin = *fNL;
+    } else
+    {
+        for (int i = 0; i < (*fNL).size(); i++)
+        {
+            (*fNLMax)(i) = std::max( (*fNLMax)(i), (*fNL)(i) );
+            (*fNLMin)(i) = std::min( (*fNLMin)(i), (*fNL)(i) );
+        }
+    }
 
 //#ifdef _WIN32
 //    std::ostringstream oss;
@@ -186,8 +224,15 @@ void nlNewtonSolver::evalNlModels( Wvec* inWaves,
     (*J) = (myMatData->Fmat)*(*JNL) - idJNL;
 }
 
-nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData, std::vector<std::tuple<double, double, int>> mapMeta)
+//nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData, std::vector<std::tuple<double, double, int>> mapMeta): myMatData ( myMatData )
+nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData): myMatData ( myMatData )
 {
+    std::vector<std::tuple<double, double, int>> mapMeta = {
+           {0.0, 1.0, 2},
+        {0.0, 1.0, 2},
+        {0.0, 1.0, 3},
+        {0.0, 1.0, 4}};
+
     nlModels = nlList;
 
     numNLPorts = 0;
@@ -195,11 +240,57 @@ nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData, std::
         numNLPorts += model->getNumPorts();
     }
 
-    std::vector<std::vector<std::pair<double, double>>> viPairLists(numNLPorts);
-    for (int i = 0; i < numNLPorts; i++)
+    int totalCount = 1;
+
+    for (auto& tup: mapMeta)
     {
-        //viPairLists[i] = nlModels[i]->getVIPairList(mapMeta[i]);
+        totalCount *= std::get<2>(tup);
     }
+
+    vsVec.resize(numNLPorts, totalCount);
+
+    for (int i = 0; i < totalCount; i++)
+    {
+        double start, end;
+        int count;
+        int index;
+        double factor = 1.0;
+        for (int j = 0; j < numNLPorts; j++)
+        {
+            count = std::get<2>(mapMeta[j]);
+            index = (int)(i / factor) % count;
+
+            start = std::get<0>(mapMeta[j]);
+            end = std::get<1>(mapMeta[j]);
+
+            vsVec(j, i) = index*(end - start)/count + start;
+
+            factor *= count;
+        }
+    }
+
+    for ( int i = 0; i < vsVec.n_cols; i++)
+    {
+        vsVec.col(i).print("-v-");
+    }
+
+    isVec.resize(numNLPorts, totalCount);
+    for (int i = 0; i < totalCount; i++)
+    {
+        int start_index = 0;
+        for ( nlModel* model : nlModels )
+        {
+            model->getCurrents(vsVec, isVec, i, start_index);
+            start_index += model->getNumPorts();
+        }
+    }
+
+    for ( int i = 0; i < isVec.n_cols; i++)
+    {
+        isVec.col(i).print("-i-");
+    }
+
+    resetTab();
 }
 
 nlTabSolver::~nlTabSolver()
@@ -209,7 +300,7 @@ nlTabSolver::~nlTabSolver()
 
 void nlTabSolver::resetTab()
 {
-
+    Wmat pMat = vsVec - myMatData->Fmat*isVec;
 }
 
 void nlTabSolver::nlSolve( Wvec* inWaves,

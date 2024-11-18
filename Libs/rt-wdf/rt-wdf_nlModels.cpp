@@ -214,9 +214,13 @@ void pnpEmModel::calculate( Wvec* fNL,
     (*currentPort) = (*currentPort)+getNumPorts();
 }
 
-std::vector<std::pair<double, double>> pnpEmModel::getVIPairList(const std::tuple<double, double, int>&)
+void pnpEmModel::getCurrents(const Wmat& vVec, Wmat& iVec, int curCol, int startIndex)
 {
-    return std::vector<std::pair<double, double>>{};
+        FloatType vEB_o_VT_BJT = vVec(startIndex, curCol)/VT_BJT;
+        FloatType vCB_o_VT_BJT = vVec(startIndex+1, curCol)/VT_BJT;
+
+        iVec(startIndex, curCol) = (Is_BJT_o_ALPHAF)*(exp(vEB_o_VT_BJT)-1) - modelSpec.Is_BJT*(exp(vCB_o_VT_BJT)-1);
+        iVec(startIndex+1, curCol) = -modelSpec.Is_BJT*(exp(vEB_o_VT_BJT)-1) + (Is_BJT_o_ALPHAR)*(exp(vCB_o_VT_BJT)-1);
 }
 
 //==============================================================================

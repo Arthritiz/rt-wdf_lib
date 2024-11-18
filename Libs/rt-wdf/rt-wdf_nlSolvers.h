@@ -144,8 +144,18 @@ protected:
     Wvec* x0Max = nullptr;
     Wvec* x0Min = nullptr;
 
+    Wvec* fNLMax = nullptr;
+    Wvec* fNLMin = nullptr;
+
     /** flag to detect first run of the solver for a clean first initial guess */
     bool firstRun = true;
+
+    long totalIter = 0;
+    long totalSubIter = 0;
+    float avgIter = 0.0;
+    int callCount = 0;
+
+    const int STEP = 100;
 
 public:
     //----------------------------------------------------------------------
@@ -206,15 +216,20 @@ public:
 class nlTabSolver: public nlSolver
 {
     matData* myMatData;
-
-public:
-    nlTabSolver( std::vector<nlModel*> nlList,
-                matData* myMatData,
-                std::vector<std::tuple<double, double, int>> mapMeta );
-
-    ~nlTabSolver();
+    Wmat vsVec;
+    Wmat isVec;
+    std::vector<std::vector<FloatType>> pVec;
 
     void resetTab();
+
+public:
+    //nlTabSolver( std::vector<nlModel*> nlList,
+    //            matData* myMatData,
+    //            std::vector<std::tuple<double, double, int>> mapMeta );
+    nlTabSolver( std::vector<nlModel*> nlList,
+                matData* myMatData );
+
+    ~nlTabSolver();
 
     void nlSolve( Wvec* inWaves,
                   Wvec* outWaves );
