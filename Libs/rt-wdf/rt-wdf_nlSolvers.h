@@ -216,8 +216,8 @@ public:
 class nlTabSolver: public nlSolver
 {
     matData* myMatData;
-    Wmat vsVec;
-    Wmat isVec;
+    std::vector<Wvec> vsVec;
+    std::vector<Wvec> isVec;
     std::vector<std::vector<FloatType>> pVec;
 
     void resetTab();

@@ -57,6 +57,9 @@ int nlSolver::getNumPorts( ) {
 //==============================================================================
 nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
                         matData* myMatData ) : myMatData ( myMatData ) {
+
+    std::cout << "newton tol: " << TOL << std::endl;
+
     nlModels = nlList;
 
     numNLPorts = 0;
@@ -233,6 +236,19 @@ nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData): myMa
         {0.0, 1.0, 3},
         {0.0, 1.0, 4}};
 
+    //std::vector<std::tuple<double, double, int>> mapMeta = {
+    //    { -0.0594, 0.2334, 200 },
+    //{ -1.3009, 0.2197, 200 },
+    //{ -0.5825, 0.2763, 200 },
+    //{ -8.9857, 0.2697, 200 }};
+
+    std::vector<std::pair<double, double>> currentLimList = {
+        {  7.7168e-09,  3.0183e-04 },
+    { -2.7231e-04, -1.2915e-08 },
+    { -1.0067e-09,  1.2291e-03 },
+    { -9.7968e-04, -6.0400e-09 },
+    };
+
     nlModels = nlList;
 
     numNLPorts = 0;
@@ -247,14 +263,14 @@ nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData): myMa
         totalCount *= std::get<2>(tup);
     }
 
-    vsVec.resize(numNLPorts, totalCount);
-
     for (int i = 0; i < totalCount; i++)
     {
         double start, end;
         int count;
         int index;
         double factor = 1.0;
+
+        Wvec vVec(numNLPorts);
         for (int j = 0; j < numNLPorts; j++)
         {
             count = std::get<2>(mapMeta[j]);
@@ -263,31 +279,35 @@ nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData): myMa
             start = std::get<0>(mapMeta[j]);
             end = std::get<1>(mapMeta[j]);
 
-            vsVec(j, i) = index*(end - start)/count + start;
+            vVec(j) = index*(end - start)/count + start;
 
             factor *= count;
         }
-    }
 
-    for ( int i = 0; i < vsVec.n_cols; i++)
-    {
-        vsVec.col(i).print("-v-");
-    }
-
-    isVec.resize(numNLPorts, totalCount);
-    for (int i = 0; i < totalCount; i++)
-    {
         int start_index = 0;
+        Wvec iVec(numNLPorts);
         for ( nlModel* model : nlModels )
         {
-            model->getCurrents(vsVec, isVec, i, start_index);
+            model->getCurrents(vVec, iVec, start_index);
             start_index += model->getNumPorts();
         }
+
+        vsVec.push_back(vVec);
+        isVec.push_back(iVec);
     }
 
-    for ( int i = 0; i < isVec.n_cols; i++)
+    std::cout << "-v-" << std::endl;
+    for (auto& vVec: vsVec)
     {
-        isVec.col(i).print("-i-");
+        vVec.t().print();
+        std::cout << "--" << std::endl;
+    }
+
+    std::cout << "-i-" << std::endl;
+    for (auto& iVec: isVec)
+    {
+        iVec.t().print();
+        std::cout << "--" << std::endl;
     }
 
     resetTab();
@@ -300,7 +320,7 @@ nlTabSolver::~nlTabSolver()
 
 void nlTabSolver::resetTab()
 {
-    Wmat pMat = vsVec - myMatData->Fmat*isVec;
+    //Wmat pMat = vsVec - myMatData->Fmat*isVec;
 }
 
 void nlTabSolver::nlSolve( Wvec* inWaves,

@@ -113,7 +113,7 @@ public:
     */
     int getNumPorts( );
 
-    virtual void getCurrents(const Wmat& vVec, Wmat& iVec, int curCol, int startIndex) {};
+    virtual void getCurrents(const Wvec& vVec, Wvec& iVec, int startIndex) {};
 
 private:
     //----------------------------------------------------------------------
@@ -243,7 +243,7 @@ public:
                     Wvec* lastX,
                     int* currentPort );
 
-    void getCurrents(const Wmat& vVec, Wmat& iVec, int curCol, int startIndex) override;
+    void getCurrents(const Wvec& vVec, Wvec& iVec, int startIndex) override;
 private:
     class ModelSpec
     {
