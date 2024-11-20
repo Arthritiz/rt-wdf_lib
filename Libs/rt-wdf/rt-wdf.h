@@ -524,15 +524,6 @@ public:
     virtual std::string getType( ) const;
 
     int getNumPorts();
-
-    void ff()
-    {
-     nlTabSolver* ga = dynamic_cast<nlTabSolver*>(NlSolver.get());
-     if (nullptr != ga)
-     {
-      ga->resetTab();
-     }
-    }
 };
 
 

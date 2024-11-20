@@ -89,18 +89,6 @@ nlNewtonSolver::~nlNewtonSolver( ) {
     delete JNL;
     delete Fmat_fNL;
 
-    x0Max->print("x0Max");
-    x0Min->print("x0Min");
-
-    fNLMax->print("fNLMax");
-    fNLMin->print("fNLMin");
-
-    delete x0Max;
-    delete x0Min;
-
-    delete fNLMax;
-    delete fNLMin;
-
     std::cout << "totalIter: " << totalIter << ", callCount: " << callCount << std::endl;
     std::cout << "avgIter(vanilla): " << totalIter/(float)callCount << std::endl;
 
@@ -163,38 +151,6 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
     {
         avgIter = (avgIter * (callCount/STEP - 1) + totalSubIter/(float)STEP)/(callCount/STEP);
         totalSubIter = 0;
-    }
-
-    if (x0Max == nullptr)
-    {
-        x0Max = new Wvec(arma::size(*x0));
-        x0Min = new Wvec(arma::size(*x0));
-
-        *x0Max = *x0;
-        *x0Min = *x0;
-    } else
-    {
-        for (int i = 0; i < (*x0).size(); i++)
-        {
-            (*x0Max)(i) = std::max( (*x0Max)(i), (*x0)(i) );
-            (*x0Min)(i) = std::min( (*x0Min)(i), (*x0)(i) );
-        }
-    }
-
-    if (fNLMax == nullptr)
-    {
-        fNLMax = new Wvec(arma::size(*fNL));
-        fNLMin = new Wvec(arma::size(*fNL));
-
-        *fNLMax = *fNL;
-        *fNLMin = *fNL;
-    } else
-    {
-        for (int i = 0; i < (*fNL).size(); i++)
-        {
-            (*fNLMax)(i) = std::max( (*fNLMax)(i), (*fNL)(i) );
-            (*fNLMin)(i) = std::min( (*fNLMin)(i), (*fNL)(i) );
-        }
     }
 
 //#ifdef _WIN32

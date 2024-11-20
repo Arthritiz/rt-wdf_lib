@@ -101,12 +101,6 @@ int wdfTree::adaptTree( ) {
         setRootMatrData( rootMatrixData, Rp );
     }
 
-    wdfRootNL* ga = dynamic_cast<wdfRootNL*>(root.get());
-
-    if (nullptr != ga)
-    {
-        ga->ff();
-    }
     return 0;
 }
 

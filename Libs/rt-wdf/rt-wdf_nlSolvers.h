@@ -141,12 +141,6 @@ protected:
     Wvec* Emat_in;
     Wmat idJNL;
 
-    Wvec* x0Max = nullptr;
-    Wvec* x0Min = nullptr;
-
-    Wvec* fNLMax = nullptr;
-    Wvec* fNLMin = nullptr;
-
     /** flag to detect first run of the solver for a clean first initial guess */
     bool firstRun = true;
 
@@ -213,6 +207,7 @@ public:
 
 };
 
+// [tab solver]: unfinished and deprecated
 class nlTabSolver: public nlSolver
 {
     matData* myMatData;
