@@ -230,17 +230,17 @@ void nlNewtonSolver::evalNlModels( Wvec* inWaves,
 //nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData, std::vector<std::tuple<double, double, int>> mapMeta): myMatData ( myMatData )
 nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData): myMatData ( myMatData )
 {
-    std::vector<std::tuple<double, double, int>> mapMeta = {
-           {0.0, 1.0, 2},
-        {0.0, 1.0, 2},
-        {0.0, 1.0, 3},
-        {0.0, 1.0, 4}};
-
     //std::vector<std::tuple<double, double, int>> mapMeta = {
-    //    { -0.0594, 0.2334, 200 },
-    //{ -1.3009, 0.2197, 200 },
-    //{ -0.5825, 0.2763, 200 },
-    //{ -8.9857, 0.2697, 200 }};
+    //       {0.0, 1.0, 2},
+    //    {0.0, 1.0, 2},
+    //    {0.0, 1.0, 3},
+    //    {0.0, 1.0, 4}};
+
+    std::vector<std::tuple<double, double, int>> mapMeta = {
+        { -0.0594, 0.2334, 20 },
+    { -1.3009, 0.2197, 50 },
+    { -0.5825, 0.2763, 30 },
+    { -8.9857, 0.2697, 100 }};
 
     std::vector<std::pair<double, double>> currentLimList = {
         {  7.7168e-09,  3.0183e-04 },
@@ -292,25 +292,44 @@ nlTabSolver::nlTabSolver(std::vector<nlModel*> nlList, matData* myMatData): myMa
             start_index += model->getNumPorts();
         }
 
+        // sifting
+        bool outOfRange = false;
+        for (int j = 0; j < iVec.size(); j++)
+        {
+            if ( (iVec[j] > currentLimList[j].second) || (iVec[j] < currentLimList[j].first) )
+            {
+                outOfRange = true;
+                break;
+            }
+        }
+
+        if (outOfRange)
+        {
+            continue;
+        }
+
         vsVec.push_back(vVec);
         isVec.push_back(iVec);
     }
 
-    std::cout << "-v-" << std::endl;
-    for (auto& vVec: vsVec)
-    {
-        vVec.t().print();
-        std::cout << "--" << std::endl;
-    }
+    std::cout << "totalCount: " << totalCount << std::endl;
+    std::cout << "after sifting: " << isVec.size() << std::endl;
 
-    std::cout << "-i-" << std::endl;
-    for (auto& iVec: isVec)
-    {
-        iVec.t().print();
-        std::cout << "--" << std::endl;
-    }
+    //std::cout << "-v-" << std::endl;
+    //for (auto& vVec: vsVec)
+    //{
+    //    vVec.t().print();
+    //    std::cout << "--" << std::endl;
+    //}
 
-    resetTab();
+    //std::cout << "-i-" << std::endl;
+    //for (auto& iVec: isVec)
+    //{
+    //    iVec.t().print();
+    //    std::cout << "--" << std::endl;
+    //}
+
+    pMat.resize( numNLPorts, isVec.size() );
 }
 
 nlTabSolver::~nlTabSolver()
@@ -320,10 +339,38 @@ nlTabSolver::~nlTabSolver()
 
 void nlTabSolver::resetTab()
 {
-    //Wmat pMat = vsVec - myMatData->Fmat*isVec;
+    Wmat vsMat(numNLPorts, vsVec.size());
+    Wmat isMat(numNLPorts, isVec.size());
+
+    int theCount = vsVec.size();
+    for (int i = 0; i < theCount; i++)
+    {
+        vsMat.col(i) = vsVec[i];
+        isMat.col(i) = isVec[i];
+    }
+
+    Wmat tmp = myMatData->Fmat*isMat;
+    pMat = vsMat - tmp;
 }
 
 void nlTabSolver::nlSolve( Wvec* inWaves,
                           Wvec* outWaves )
 {
+
+    Wvec p = myMatData->Emat * (*inWaves);
+
+    double minDis = arma::norm(p - pMat.col(0), 2);
+    int minIndex = 0;
+
+    for (int i = 1; i < pMat.n_cols; i++)
+    {
+        double tmp = arma::norm(p - pMat.col(i), 2);
+        if (tmp < minDis)
+        {
+            minDis = tmp;
+            minIndex = i;
+        }
+    }
+
+    (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * isVec[minIndex];
 }

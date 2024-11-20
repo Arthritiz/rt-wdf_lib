@@ -52,7 +52,7 @@
 // Newton Solver config parameters
 
 /** tolerance for ||F||_2 */
-#define TOL     1.0e-04                     // TODO: evaluate physically meaningful tolerance.
+#define TOL     1.0e-4                     // TODO: evaluate physically meaningful tolerance.
 /** limit on function evaluations */
 #define ITMAX   2000
 
@@ -218,9 +218,8 @@ class nlTabSolver: public nlSolver
     matData* myMatData;
     std::vector<Wvec> vsVec;
     std::vector<Wvec> isVec;
-    std::vector<std::vector<FloatType>> pVec;
+    Wmat pMat;
 
-    void resetTab();
 
 public:
     //nlTabSolver( std::vector<nlModel*> nlList,
@@ -233,6 +232,8 @@ public:
 
     void nlSolve( Wvec* inWaves,
                   Wvec* outWaves );
+
+    void resetTab();
 };
 
 #endif  // RTWDF_NLSOLVERS_H_INCLUDED

@@ -359,7 +359,6 @@ public:
      @returns                   a String describing the type of this root
      */
     virtual std::string getType( ) const = 0;
-
 };
 
 //==============================================================================
@@ -525,6 +524,15 @@ public:
     virtual std::string getType( ) const;
 
     int getNumPorts();
+
+    void ff()
+    {
+     nlTabSolver* ga = dynamic_cast<nlTabSolver*>(NlSolver.get());
+     if (nullptr != ga)
+     {
+      ga->resetTab();
+     }
+    }
 };
 
 
@@ -1274,6 +1282,9 @@ class wdfTerminatedCap : public wdfTerminatedLeaf {
 
 public:
     //----------------------------------------------------------------------
+    wdfTerminatedCap( double C,
+                      double sampleRate);
+
     /**
      Adapted capacitor model class.
 
@@ -1283,7 +1294,8 @@ public:
      @param sampleRate         sample rate in Hertz
      */
     wdfTerminatedCap( double C,
-                      double sampleRate );
+                      double sampleRate,
+                      double prevA);
 
     //----------------------------------------------------------------------
     /**

@@ -98,9 +98,15 @@ int wdfTree::adaptTree( ) {
 
     matData* rootMatrixData = root->getRootMatrPtr( );
     if( rootMatrixData != NULL ){
-        return setRootMatrData( rootMatrixData, Rp );
+        setRootMatrData( rootMatrixData, Rp );
     }
 
+    wdfRootNL* ga = dynamic_cast<wdfRootNL*>(root.get());
+
+    if (nullptr != ga)
+    {
+        ga->ff();
+    }
     return 0;
 }
 
@@ -172,15 +178,9 @@ wdfRootNL::wdfRootNL( int numSubtrees,
                                          numSubtrees( numSubtrees ) {
     rootMatrixData.reset( new matData );
 
-    std::vector<std::tuple<double, double, int>> ga = {
-        {0.0, 1.0, 2},
-        {0.0, 1.0, 2},
-        {0.0, 1.0, 3},
-        {0.0, 1.0, 4}};
-
     // TODO make ENUM / MAP variant with different nlSolvers (!!)
-    //NlSolver.reset( new nlNewtonSolver( nlList, rootMatrixData.get() ) );
-    NlSolver.reset( new nlTabSolver( nlList, rootMatrixData.get()) );
+    NlSolver.reset( new nlNewtonSolver( nlList, rootMatrixData.get() ) );
+    //NlSolver.reset( new nlTabSolver( nlList, rootMatrixData.get()) );
     int numNonlinearities = NlSolver->getNumPorts( );
 
     rootMatrixData->Smat.set_size( numSubtrees+numNonlinearities, numSubtrees+numNonlinearities );
@@ -567,10 +567,18 @@ void wdfTerminatedLeaf::calculateScatterCoeffs( ) {
 #pragma mark Terminated Capacitor
 //==============================================================================
 wdfTerminatedCap::wdfTerminatedCap( double C,
-                                    double sampleRate ) : wdfTerminatedLeaf( ),
+                                    double sampleRate) : wdfTerminatedLeaf( ),
+                                                 C( C ),
+                                                 sampleRate( sampleRate ) {
+
+}
+
+wdfTerminatedCap::wdfTerminatedCap( double C,
+                                    double sampleRate,
+                                    double prevA = 0.0) : wdfTerminatedLeaf( ),
                                                  C( C ),
                                                  sampleRate( sampleRate ),
-                                                 prevA( 0 ) {
+                                                 prevA( prevA ) {
 
 }
 
