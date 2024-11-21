@@ -35,6 +35,9 @@ void debugOutput(const std::string& msg) {
 }
 #endif
 
+//#define PREV_WAY
+#define TRACKING
+
 //==============================================================================
 // Parent class for nlSolvers
 //==============================================================================
@@ -89,11 +92,13 @@ nlNewtonSolver::~nlNewtonSolver( ) {
     delete JNL;
     delete Fmat_fNL;
 
+#ifdef TRACKING
     std::cout << "totalIter: " << totalIter << ", callCount: " << callCount << std::endl;
     std::cout << "avgIter(vanilla): " << totalIter/(float)callCount << std::endl;
 
     avgIter = (avgIter * callCount/STEP + totalSubIter/(float)STEP)/(callCount/(float)STEP);
     std::cout << "avgIter(my way): " << avgIter << std::endl;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -111,7 +116,11 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
         firstRun = false;
     }
     else {
+#ifdef PREV_WAY
+        (*x0) = (*Fmat_fNL) + myMatData->Emat*prevInWaves;
+#else
         (*x0) = (*Fmat_fNL) + (*Emat_in);
+#endif
     }
 
     evalNlModels( inWaves, myMatData, x0 );
@@ -143,6 +152,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
         std::cout << "convergence failed" << std::endl;
     }
 
+#ifdef TRACKING
     totalIter += iter;
     callCount += 1;
     totalSubIter += iter;
@@ -152,6 +162,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
         avgIter = (avgIter * (callCount/STEP - 1) + totalSubIter/(float)STEP)/(callCount/STEP);
         totalSubIter = 0;
     }
+#endif
 
 //#ifdef _WIN32
 //    std::ostringstream oss;
@@ -164,6 +175,9 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 
     (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * (*fNL);
 
+#ifdef PREV_WAY
+    prevInWaves = *inWaves;
+#endif
 }
 
 //----------------------------------------------------------------------

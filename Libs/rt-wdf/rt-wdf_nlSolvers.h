@@ -140,6 +140,7 @@ protected:
     /** variable to store Emat * inWaves */
     Wvec* Emat_in;
     Wmat idJNL;
+    Wvec prevInWaves;
 
     /** flag to detect first run of the solver for a clean first initial guess */
     bool firstRun = true;
