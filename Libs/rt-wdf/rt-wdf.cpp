@@ -42,7 +42,6 @@ wdfTree::wdfTree( ) {
 }
 
 wdfTree::~wdfTree( ) {
-    std::cout << "wdfTree total elapsed: " << totalElapsed << ", calls: " << callCount << "\n";
 }
 
 //----------------------------------------------------------------------
@@ -54,15 +53,9 @@ void wdfTree::cycleWave( ) {
 
     root->processAscendingWaves( ascendingWaves.get(), descendingWaves.get() );
 
-    //auto start = std::chrono::high_resolution_clock::now();
-
     for( unsigned int i = 0; i < subtreeCount; i++ ) {
         subtreeEntryNodes[i]->pushWaveDown( (*descendingWaves)[i] );
     }
-
-    /*auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
-    totalElapsed += (double)elapsed.count()/1e6;
-    callCount += 1;*/
 }
 
 //----------------------------------------------------------------------

@@ -35,9 +35,6 @@ void debugOutput(const std::string& msg) {
 }
 #endif
 
-//#define PREV_WAY
-#define TRACKING
-
 //==============================================================================
 // Parent class for nlSolvers
 //==============================================================================
@@ -98,6 +95,8 @@ nlNewtonSolver::~nlNewtonSolver( ) {
 
     avgIter = (avgIter * callCount/STEP + totalSubIter/(float)STEP)/(callCount/(float)STEP);
     std::cout << "avgIter(my way): " << avgIter << std::endl;
+
+    std::cout << "solver elapsed: " << totalElapsed << std::endl;
 #endif
 }
 
@@ -132,6 +131,10 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
     Wvec xnew;
     FloatType normFnew;
 
+#ifdef TRACKING
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
+
     while ( (normF >= TOL) && (iter < ITMAX) )
     {
         Wvec p = - (*J).i() * (*F);
@@ -146,6 +149,10 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 
     //        printf(" %3g %9.2e %14.7e\n", iter, alpha, normF);
     }
+
+#ifdef TRACKING
+    totalElapsed += (double)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count()/1e6;
+#endif
 
     if (iter == ITMAX)
     {

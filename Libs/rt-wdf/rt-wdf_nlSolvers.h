@@ -36,6 +36,8 @@
 #include "rt-wdf_nlModels.h"
 
 
+//#define PREV_WAY
+#define TRACKING
 
 //==============================================================================
 // Define enums for solver identifiers
@@ -145,12 +147,18 @@ protected:
     /** flag to detect first run of the solver for a clean first initial guess */
     bool firstRun = true;
 
+#ifdef TRACKING
+    // tracking iteration
     long totalIter = 0;
     long totalSubIter = 0;
     float avgIter = 0.0;
     int callCount = 0;
 
     const int STEP = 100;
+
+    // tracking elapse
+    double totalElapsed = 0.0;
+#endif
 
 public:
     //----------------------------------------------------------------------
