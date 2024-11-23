@@ -105,7 +105,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
                           Wvec* outWaves ) {
 
     int iter = 0;            // # of iteration
-    FloatType alpha = 0;
+    FloatType alpha = 1.0;
 
     *Emat_in = (myMatData->Emat)*(*inWaves);
 
@@ -138,13 +138,23 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
     while ( (normF >= TOL) && (iter < ITMAX) )
     {
         Wvec p = - (*J).i() * (*F);
-        alpha = 1;
         xnew = (*x0) + alpha * p;
         evalNlModels(inWaves, myMatData, &xnew);
         normFnew = arma::norm(*F);
 
+#ifdef BTWAY
+        if (normFnew < normF)
+        {
+            alpha = 1.0;
+        } else
+        {
+            alpha /= 2;
+        }
+#endif
+
         (*x0) = xnew;
         normF = normFnew;
+
         iter++;
 
     //        printf(" %3g %9.2e %14.7e\n", iter, alpha, normF);

@@ -36,8 +36,9 @@
 #include "rt-wdf_nlModels.h"
 
 
-//#define PREV_WAY
+#define PREV_WAY
 #define TRACKING
+//#define BTWAY
 
 //==============================================================================
 // Define enums for solver identifiers
@@ -54,7 +55,7 @@
 // Newton Solver config parameters
 
 /** tolerance for ||F||_2 */
-#define TOL     1.0e-4                     // TODO: evaluate physically meaningful tolerance.
+#define TOL     1.0e-9                     // TODO: evaluate physically meaningful tolerance.
 /** limit on function evaluations */
 #define ITMAX   2000
 
