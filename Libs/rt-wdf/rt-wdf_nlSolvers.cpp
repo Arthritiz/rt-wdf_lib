@@ -56,7 +56,7 @@ int nlSolver::getNumPorts( ) {
 // Newton Solver
 //==============================================================================
 nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
-                        matData* myMatData ) : myMatData ( myMatData ) {
+                        matData* myMatData ) : myMatData ( myMatData ), pTracker("p") {
 
     std::cout << "newton tol: " << TOL << std::endl;
 
@@ -67,14 +67,18 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
         numNLPorts += model->getNumPorts();
     }
 
-    x0       = new Wvec( numNLPorts, arma::fill::zeros);
-    F        = new Wvec( numNLPorts, arma::fill::zeros);
-    J        = new Wmat( numNLPorts,numNLPorts, arma::fill::zeros);
-    fNL      = new Wvec( numNLPorts, arma::fill::zeros);
-    JNL      = new Wmat( numNLPorts,numNLPorts, arma::fill::zeros);
-    Fmat_fNL = new Wvec( numNLPorts, arma::fill::zeros);
-    Emat_in = new Wvec( numNLPorts, arma::fill::zeros);
-    idJNL = arma::eye<Wmat>(size(*JNL));
+    VEC_ALLOC(x0       , numNLPorts);
+    VEC_ALLOC(F        , numNLPorts);
+    MAT_ALLOC(J        , numNLPorts, numNLPorts);
+    VEC_ALLOC(fNL      , numNLPorts);
+    MAT_ALLOC(JNL      , numNLPorts, numNLPorts);
+    VEC_ALLOC(Fmat_fNL , numNLPorts);
+    VEC_ALLOC(Emat_in  , numNLPorts);
+    MAT_ASSIGN_ID_BY_MAT(idJNL, *JNL);
+
+#ifdef TRACKING
+    pTracker.init(numNLPorts);
+#endif
 }
 
 nlNewtonSolver::~nlNewtonSolver( ) {
@@ -97,6 +101,7 @@ nlNewtonSolver::~nlNewtonSolver( ) {
     std::cout << "avgIter(my way): " << avgIter << std::endl;
 
     std::cout << "solver elapsed: " << totalElapsed << std::endl;
+    pTracker.print();
 #endif
 }
 
@@ -109,7 +114,11 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 
     *Emat_in = (myMatData->Emat)*(*inWaves);
 
-    (*J).zeros();
+#ifdef TRACKING
+    pTracker.track(*Emat_in);
+#endif
+
+    MAT_SETZERO((*J));
 
     if ( firstRun ) {
         firstRun = false;
@@ -124,7 +133,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 
     evalNlModels( inWaves, myMatData, x0 );
 
-    FloatType normF = arma::norm(*F);
+    FloatType normF = W_NORM(*F);
     //printf("iter alpha         ||F||_2\n");
     //printf(" %3g %9.2e %14.7e\n", iter, alpha, normF);
 
@@ -140,7 +149,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
         Wvec p = - (*J).i() * (*F);
         xnew = (*x0) + alpha * p;
         evalNlModels(inWaves, myMatData, &xnew);
-        normFnew = arma::norm(*F);
+        normFnew = W_NORM(*F);
 
 #ifdef BTWAY
         if (normFnew < normF)
@@ -191,6 +200,11 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 //#endif
 
     (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * (*fNL);
+
+#ifdef TRACKING
+    pVec.push_back(*Emat_in);
+    iVec.push_back(*fNL);
+#endif
 
 #ifdef PREV_WAY
     prevInWaves = *inWaves;

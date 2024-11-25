@@ -367,7 +367,7 @@ wdfTerminatedRtype::~wdfTerminatedRtype( ) {
 //----------------------------------------------------------------------
 double wdfTerminatedRtype::calculateUpB( )
 {
-    arma::colvec inWaves( childrenNodes.size()+1 );
+    WcolVec inWaves( childrenNodes.size()+1 );
     inWaves(0) = 0;
     for( unsigned int i = 0; i < childrenNodes.size(); i++ ) {
         inWaves(i+1) = downPorts[i]->a;
@@ -380,13 +380,13 @@ double wdfTerminatedRtype::calculateUpB( )
 //----------------------------------------------------------------------
 void wdfTerminatedRtype::calculateDownB( double descendingWave )
 {
-    arma::colvec inWaves( childrenNodes.size()+1 );
+    WcolVec inWaves( childrenNodes.size()+1 );
     inWaves(0) = descendingWave;
     for( unsigned int i = 0; i < childrenNodes.size(); i++ ) {
         inWaves(i+1) = downPorts[i]->a;
     }
 
-    arma::colvec downWaves = (*S) * inWaves;
+    WcolVec downWaves = (*S) * inWaves;
 
     for( unsigned int i = 0; i < childrenNodes.size(); i++ ) {
         downPorts[i]->b = downWaves(i+1);

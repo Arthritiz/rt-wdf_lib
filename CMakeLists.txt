@@ -2,7 +2,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(modules/armadillo-code)
-
 set(LIB_NAME "RtWdfLib")
 
 set(SOURCES
@@ -13,7 +12,10 @@ set(SOURCES
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
+target_include_directories(${LIB_NAME} PUBLIC ./modules/eigen)
+
 target_link_libraries(${LIB_NAME}
     PRIVATE
         armadillo)
+
 
