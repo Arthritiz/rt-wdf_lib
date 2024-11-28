@@ -81,6 +81,38 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
 #endif
 }
 
+void writeVector(const std::vector<Wvec>& arr, const std::string& filePath)
+{
+    try {
+        // Open a file in write mode
+        std::ofstream outFile(filePath);
+
+        // Check if file was successfully opened
+        if (!outFile.is_open()) {
+            throw std::ios_base::failure("Failed to open the file.");
+        }
+
+        // Set exceptions for the ofstream to throw if an error occurs
+        outFile.exceptions(std::ios::failbit | std::ios::badbit);
+
+        // Write each element to the file
+        for (const auto& vec : arr) {
+            for (auto& val: vec)
+            {
+                outFile << std::fixed << std::setprecision(9) << val << ",";
+            }
+            outFile << "\n";
+        }
+
+        outFile.close();
+        std::cout << "Data written to " << filePath << std::endl;
+    } catch (const std::ios_base::failure& e) {
+        std::cerr << "File I/O error: " << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "An unexpected error occurred: " << e.what() << std::endl;
+    }
+}
+
 nlNewtonSolver::~nlNewtonSolver( ) {
     size_t modelCount = nlModels.size();
     for( size_t i = 0; i < modelCount; i++ ) {
@@ -102,6 +134,12 @@ nlNewtonSolver::~nlNewtonSolver( ) {
 
     std::cout << "solver elapsed: " << totalElapsed << std::endl;
     pTracker.print();
+
+#endif
+
+#ifdef RECORD_TABLE
+    writeVector(pVec, "pVec.txt");
+    writeVector(iVec, "iVec.txt");
 #endif
 }
 
@@ -112,7 +150,9 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
     int iter = 0;            // # of iteration
     FloatType alpha = 1.0;
 
+#ifndef RECORD_TABLE
     *Emat_in = (myMatData->Emat)*(*inWaves);
+#endif
 
 #ifdef TRACKING
     pTracker.track(*Emat_in);
@@ -131,7 +171,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 #endif
     }
 
-    evalNlModels( inWaves, myMatData, x0 );
+    evalNlModels( myMatData, x0 );
 
     FloatType normF = W_NORM(*F);
     //printf("iter alpha         ||F||_2\n");
@@ -148,7 +188,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
     {
         Wvec p = - (*J).i() * (*F);
         xnew = (*x0) + alpha * p;
-        evalNlModels(inWaves, myMatData, &xnew);
+        evalNlModels( myMatData, &xnew);
         normFnew = W_NORM(*F);
 
 #ifdef BTWAY
@@ -176,6 +216,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
     if (iter == ITMAX)
     {
         std::cout << "convergence failed" << std::endl;
+        throw std::runtime_error("convergence failed");
     }
 
 #ifdef TRACKING
@@ -201,7 +242,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 
     (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * (*fNL);
 
-#ifdef TRACKING
+#ifdef RECORD_TABLE
     pVec.push_back(*Emat_in);
     iVec.push_back(*fNL);
 #endif
@@ -212,9 +253,8 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 }
 
 //----------------------------------------------------------------------
-void nlNewtonSolver::evalNlModels( Wvec* inWaves,
-                               matData* myMatData,
-                               Wvec* x ) {
+void nlNewtonSolver::evalNlModels( matData* myMatData,
+                                   Wvec* x ) {
     int currentPort = 0;
     (*JNL).zeros();
 

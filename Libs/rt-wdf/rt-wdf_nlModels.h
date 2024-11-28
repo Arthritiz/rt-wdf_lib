@@ -199,6 +199,10 @@ public:
 #define VT_BJT      0.02585
 
 class npnEmModel : public nlModel {
+    FloatType vcrit;
+    FloatType Is_BJT = 5.911e-15;
+
+    FloatType limitStep(FloatType vnew, FloatType vold);
 
 public:
     //----------------------------------------------------------------------

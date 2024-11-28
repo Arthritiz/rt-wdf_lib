@@ -230,6 +230,8 @@ public:
      */
     void cycleWave( );
 
+    void pWave();
+
     //----------------------------------------------------------------------
     /**
      Virtual placeholder function that is meant to set the circuit's input
@@ -295,6 +297,7 @@ public:
 class wdfRoot {
 
 public:
+    Wvec pVec;
     //----------------------------------------------------------------------
     /**
      Base class for all root subclasses.

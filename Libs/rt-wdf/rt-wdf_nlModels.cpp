@@ -99,7 +99,26 @@ void diodeApModel::calculate( Wvec* fNL,
 // ("Large-signal behavior of junction transistors")
 //==============================================================================
 npnEmModel::npnEmModel() : nlModel( 2 ) {
+    vcrit = VT_BJT * std::log(VT_BJT/(std::sqrt(2)*Is_BJT));
+}
 
+FloatType npnEmModel::limitStep(FloatType vnew, FloatType vold) {
+    FloatType arg;
+
+    if ((vnew > vcrit) && (abs(vnew - vold) > (VT_BJT + VT_BJT))) {
+        if (vold > 0) {
+            arg = 1 + (vnew - vold)/VT_BJT;
+            if (arg > 0) {
+                vnew = vold + VT_BJT * std::log(arg);
+            } else {
+                vnew = vcrit;
+            }
+        } else {
+            vnew = VT_BJT * std::log(vnew/VT_BJT);
+        }
+    }
+
+    return vnew;
 }
 
 //----------------------------------------------------------------------
@@ -109,11 +128,16 @@ void npnEmModel::calculate( Wvec* fNL,
                             Wvec* lastX,
                             int* currentPort) {
 
-    const double Is_BJT = 5.911e-15;
+    //const double Is_BJT = 5.911e-15;
     const double BETAF  = 1.434e3;
     const double BETAR  = 1.262;
     const double ALPHAF = (BETAF/(1.0+BETAF));
     const double ALPHAR = (BETAR/(1.0+BETAR));
+
+    for (int i = *currentPort; i < *currentPort + getNumPorts(); i++)
+    {
+        (*x)(i) = limitStep((*x)(i), (*lastX)(i));
+    }
 
     const double vBC = (*x)(*currentPort);
     const double vBE = (*x)((*currentPort)+1);
@@ -172,7 +196,7 @@ pnpEmModel::pnpEmModel(std::string modelName): nlModel(2)
     auto iter = pnpEmModel::modelSpecs.find(modelName);
     if (iter == pnpEmModel::modelSpecs.end())
     {
-        throw;
+        throw std::invalid_argument("unknown model name: " + modelName);
     }
 
     this->modelSpec = iter->second;

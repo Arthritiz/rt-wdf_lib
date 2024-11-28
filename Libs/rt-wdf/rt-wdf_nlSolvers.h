@@ -37,9 +37,10 @@
 #include <limits>
 
 
-#define PREV_WAY
+//#define PREV_WAY
 #define TRACKING
 //#define BTWAY
+//#define RECORD_TABLE
 
 class RangeTracker
 {
@@ -125,6 +126,9 @@ class nlNewtonSolver;
 class nlSolver {
 
 public:
+    /** variable to store Emat * inWaves */
+    Wvec* Emat_in;
+
     //----------------------------------------------------------------------
     /**
      Parent class for all non-linear solvers.
@@ -195,8 +199,6 @@ protected:
     /** variable to store Fmat * fNL for x0 next prediction */
     Wvec* Fmat_fNL;
 
-    /** variable to store Emat * inWaves */
-    Wvec* Emat_in;
     Wmat idJNL;
     Wvec prevInWaves;
 
@@ -273,7 +275,7 @@ public:
      @param *myMatData          is a pointer to the E,F,M,N matrices
      @param *x                  is a pointer to the input values x
     */
-    void evalNlModels(Wvec* inWaves, matData* myMatData, Wvec* x);
+    void evalNlModels(matData* myMatData, Wvec* x);
 
 };
 

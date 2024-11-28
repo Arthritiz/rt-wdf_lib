@@ -58,6 +58,61 @@ void wdfTree::cycleWave( ) {
     }
 }
 
+void wdfTree::pWave()
+{
+    //std::vector<std::tuple<double, double, int>> dimInfo = {
+    //    { -1, 0, 2 },
+    //{ -10, -9, 3 },
+    //{ 8, 9, 4 },
+    //{ 0, 1, 5 }};
+    std::vector<std::tuple<double, double, int>> dimInfo = {
+    { -1.33889    , 1.14863, 50 },
+    { -10.339     ,-7.85137, 50 },
+    { 8.5926      , 8.75718, 50 },
+    { 0.000214788 , 0.000294038 , 50 }};
+
+    int dimSize = dimInfo.size();
+    (root->pVec).set_size(dimSize);
+
+    int totalCount = 1;
+
+    for (auto& tup: dimInfo)
+    {
+        totalCount *= std::get<2>(tup);
+
+        double start = std::get<0>(tup);
+        double end = std::get<1>(tup);
+
+        if (start >= end)
+        {
+            throw;
+        }
+    }
+
+    for (int i = 0; i < totalCount; i++)
+    {
+        double start, end;
+        int count;
+        int index;
+        double factor = 1.0;
+
+        for (int j = 0; j < dimSize; j++)
+        {
+            count = std::get<2>(dimInfo[j]);
+            index = (int)(i / factor) % count;
+
+            start = std::get<0>(dimInfo[j]);
+            end = std::get<1>(dimInfo[j]);
+
+            (root->pVec)(j) = index*(end - start)/count + start;
+
+            factor *= count;
+        }
+
+        root->processAscendingWaves( ascendingWaves.get(), descendingWaves.get() );
+    }
+}
+
 //----------------------------------------------------------------------
 void wdfTree::initTree( ) {
     ascendingWaves.reset( new Wvec( subtreeCount ) );
@@ -184,6 +239,10 @@ wdfRootNL::~wdfRootNL( ) {
 //----------------------------------------------------------------------
 void wdfRootNL::processAscendingWaves( Wvec* ascendingWaves,
                                        Wvec* descendingWaves ) {
+#ifdef RECORD_TABLE
+    *(NlSolver->Emat_in) = pVec;
+#endif
+
     NlSolver->nlSolve( ascendingWaves, descendingWaves );
 }
 
