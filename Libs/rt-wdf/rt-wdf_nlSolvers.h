@@ -38,63 +38,9 @@
 
 
 //#define PREV_WAY
-#define TRACKING
+//#define TRACKING
 //#define BTWAY
-//#define RECORD_TABLE
-
-class RangeTracker
-{
-public:
- RangeTracker(std::string l): label(l) {};
- void init(int size)
- {
-  minV.set_size(size);
-  minV.fill(std::numeric_limits<FloatType>::max());
-
-  maxV.set_size(size);
-  maxV.fill(-std::numeric_limits<FloatType>::max());
- }
-
- void track(Wvec& v)
- {
-  for (int i = 0; i < v.n_elem; i++)
-  {
-   auto& e = v(i);
-
-   if (e < minV(i))
-   {
-    minV(i) = e;
-   }
-
-   if (e > maxV(i))
-   {
-    maxV(i) = e;
-   }
-  }
- }
-
- void print()
- {
-  std::cout << label << " min" << std::endl;
-
-  for (auto& v: minV)
-  {
-   std::cout << v << std::endl;
-  }
-
-  std::cout << label << " max" << std::endl;
-
-  for (auto& v: maxV)
-  {
-   std::cout << v << std::endl;
-  }
- }
-
-private:
- std::string label;
- Wvec minV;
- Wvec maxV;
-};
+#define RECORD_TABLE
 
 //==============================================================================
 // Define enums for solver identifiers
@@ -126,6 +72,15 @@ class nlNewtonSolver;
 class nlSolver {
 
 public:
+#ifdef RECORD_TABLE
+    std::vector<Wvec> pVec;
+    std::vector<Wvec> iVec;
+#endif
+
+#ifdef TRACKING
+    RangeTracker pTracker;
+#endif
+
     /** variable to store Emat * inWaves */
     Wvec* Emat_in;
 
@@ -216,11 +171,6 @@ protected:
 
     // tracking elapse
     double totalElapsed = 0.0;
-
-    RangeTracker pTracker;
-
-    std::vector<Wvec> pVec;
-    std::vector<Wvec> iVec;
 #endif
 
 public:

@@ -87,6 +87,12 @@ class wdfTree {
 public:
     //----------------------------------------------------------------------
     /**
+     Pointer to the root object of this tree.
+     */
+    std::unique_ptr<wdfRoot> root;
+
+    //----------------------------------------------------------------------
+    /**
      Base class for a WDF tree.
 
      This class is always user-extended by a subclass that specifies the
@@ -107,12 +113,6 @@ private:
     int callCount = 0;
 
 protected:
-    //----------------------------------------------------------------------
-    /**
-     Pointer to the root object of this tree.
-     */
-    std::unique_ptr<wdfRoot> root;
-
     //----------------------------------------------------------------------
     /**
      Array of pointers to the first nodes in the subtrees that hang off
@@ -297,7 +297,6 @@ public:
 class wdfRoot {
 
 public:
-    Wvec pVec;
     //----------------------------------------------------------------------
     /**
      Base class for all root subclasses.
@@ -462,9 +461,9 @@ private:
      around the non-linearities in the root.
      */
     //std::unique_ptr<nlNewtonSolver> NlSolver;
-    std::unique_ptr<nlSolver> NlSolver;
 
 public:
+    std::unique_ptr<nlSolver> NlSolver;
     //----------------------------------------------------------------------
     /**
      Multiple/Multiport Non-Linearities root implementation.

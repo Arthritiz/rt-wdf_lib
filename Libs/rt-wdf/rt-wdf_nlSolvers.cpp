@@ -38,7 +38,11 @@ void debugOutput(const std::string& msg) {
 //==============================================================================
 // Parent class for nlSolvers
 //==============================================================================
-nlSolver::nlSolver( ) : numNLPorts( 0 ) {
+nlSolver::nlSolver( ) :
+#ifdef TRACKING
+                pTracker("p"),
+#endif
+                numNLPorts( 0 ) {
 
 }
 
@@ -56,7 +60,8 @@ int nlSolver::getNumPorts( ) {
 // Newton Solver
 //==============================================================================
 nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
-                        matData* myMatData ) : myMatData ( myMatData ), pTracker("p") {
+                        matData* myMatData ) :
+                                myMatData ( myMatData )  {
 
     std::cout << "newton tol: " << TOL << std::endl;
 
@@ -81,38 +86,6 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
 #endif
 }
 
-void writeVector(const std::vector<Wvec>& arr, const std::string& filePath)
-{
-    try {
-        // Open a file in write mode
-        std::ofstream outFile(filePath);
-
-        // Check if file was successfully opened
-        if (!outFile.is_open()) {
-            throw std::ios_base::failure("Failed to open the file.");
-        }
-
-        // Set exceptions for the ofstream to throw if an error occurs
-        outFile.exceptions(std::ios::failbit | std::ios::badbit);
-
-        // Write each element to the file
-        for (const auto& vec : arr) {
-            for (auto& val: vec)
-            {
-                outFile << std::fixed << std::setprecision(9) << val << ",";
-            }
-            outFile << "\n";
-        }
-
-        outFile.close();
-        std::cout << "Data written to " << filePath << std::endl;
-    } catch (const std::ios_base::failure& e) {
-        std::cerr << "File I/O error: " << e.what() << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "An unexpected error occurred: " << e.what() << std::endl;
-    }
-}
-
 nlNewtonSolver::~nlNewtonSolver( ) {
     size_t modelCount = nlModels.size();
     for( size_t i = 0; i < modelCount; i++ ) {
@@ -134,12 +107,6 @@ nlNewtonSolver::~nlNewtonSolver( ) {
 
     std::cout << "solver elapsed: " << totalElapsed << std::endl;
     pTracker.print();
-
-#endif
-
-#ifdef RECORD_TABLE
-    writeVector(pVec, "pVec.txt");
-    writeVector(iVec, "iVec.txt");
 #endif
 }
 

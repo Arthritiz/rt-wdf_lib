@@ -59,4 +59,64 @@ using WcolVec = arma::colvec;
 //
 //#define W_SUBVEC(VEC, START, END)
 
+class RangeTracker
+{
+public:
+ RangeTracker(std::string l): label(l) {};
+ void init(int size)
+ {
+  minV.set_size(size);
+  minV.fill(std::numeric_limits<FloatType>::max());
+
+  maxV.set_size(size);
+  maxV.fill(-std::numeric_limits<FloatType>::max());
+ }
+
+ void track(Wvec& v)
+ {
+  if (v.size() != minV.size())
+  {
+   throw;
+  }
+
+  for (int i = 0; i < v.n_elem; i++)
+  {
+   auto& e = v(i);
+
+   if (e < minV(i))
+   {
+    minV(i) = e;
+   }
+
+   if (e > maxV(i))
+   {
+    maxV(i) = e;
+   }
+  }
+ }
+
+ void print()
+ {
+  std::cout << label << " min" << std::endl;
+
+  for (auto& v: minV)
+  {
+   std::cout << v << std::endl;
+  }
+
+  std::cout << label << " max" << std::endl;
+
+  for (auto& v: maxV)
+  {
+   std::cout << v << std::endl;
+  }
+ }
+
+ Wvec minV;
+ Wvec maxV;
+
+private:
+ std::string label;
+};
+
 #endif //RT_WDF_UTILS_H

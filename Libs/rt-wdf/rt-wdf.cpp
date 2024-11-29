@@ -65,15 +65,22 @@ void wdfTree::pWave()
     //{ -10, -9, 3 },
     //{ 8, 9, 4 },
     //{ 0, 1, 5 }};
+
+    // range_1
+    //std::vector<std::tuple<double, double, int>> dimInfo = {
+    //{ -1.33889    , 1.14863, 50 },
+    //{ -10.339     ,-7.85137, 50 },
+    //{ 8.5926      , 8.75718, 50 },
+    //{ 0.000214788 , 0.000294038 , 50 }};
+
+    // range_2
     std::vector<std::tuple<double, double, int>> dimInfo = {
-    { -1.33889    , 1.14863, 50 },
-    { -10.339     ,-7.85137, 50 },
-    { 8.5926      , 8.75718, 50 },
-    { 0.000214788 , 0.000294038 , 50 }};
+        { -1.34423,    1.15186,     50 },
+        { -10.3442,    -7.84813,    50 },
+        { 8.06521,     8.99673,     50 },
+        { 5.48388e-05, 0.000402145, 50 }};
 
     int dimSize = dimInfo.size();
-    (root->pVec).set_size(dimSize);
-
     int totalCount = 1;
 
     for (auto& tup: dimInfo)
@@ -104,7 +111,7 @@ void wdfTree::pWave()
             start = std::get<0>(dimInfo[j]);
             end = std::get<1>(dimInfo[j]);
 
-            (root->pVec)(j) = index*(end - start)/count + start;
+            (*(dynamic_cast<wdfRootNL*>(root.get())->NlSolver->Emat_in))(j) = index*(end - start)/count + start;
 
             factor *= count;
         }
@@ -239,10 +246,6 @@ wdfRootNL::~wdfRootNL( ) {
 //----------------------------------------------------------------------
 void wdfRootNL::processAscendingWaves( Wvec* ascendingWaves,
                                        Wvec* descendingWaves ) {
-#ifdef RECORD_TABLE
-    *(NlSolver->Emat_in) = pVec;
-#endif
-
     NlSolver->nlSolve( ascendingWaves, descendingWaves );
 }
 
