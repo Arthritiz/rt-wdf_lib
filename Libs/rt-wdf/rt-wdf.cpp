@@ -111,7 +111,7 @@ void wdfTree::pWave()
             start = std::get<0>(dimInfo[j]);
             end = std::get<1>(dimInfo[j]);
 
-            (*(dynamic_cast<wdfRootNL*>(root.get())->NlSolver->Emat_in))(j) = index*(end - start)/count + start;
+            (*(dynamic_cast<wdfRootNL*>(root.get())->NlSolver->Emat_in))(j) = index*(end - start)/(count-1) + start;
 
             factor *= count;
         }
