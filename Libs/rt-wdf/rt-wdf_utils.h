@@ -59,6 +59,8 @@ using WcolVec = arma::colvec;
 //
 //#define W_SUBVEC(VEC, START, END)
 
+using Essence = std::tuple<double, int, double, int, double, double>;
+
 class RangeTracker
 {
 public:

@@ -29,6 +29,9 @@
 //==============================================================================
 #include "rt-wdf.h"
 #include <assert.h>
+#include <cmath>
+
+#include "../../../JUCE/modules/juce_gui_extra/misc/juce_LiveConstantEditor.h"
 
 #pragma mark - Tree
 //==============================================================================
@@ -55,6 +58,128 @@ void wdfTree::cycleWave( ) {
 
     for( unsigned int i = 0; i < subtreeCount; i++ ) {
         subtreeEntryNodes[i]->pushWaveDown( (*descendingWaves)[i] );
+    }
+}
+
+double getValueByIndex(std::tuple<double, double, int> info, int index)
+{
+    double min = std::get<0>(info);
+    double max = std::get<1>(info);
+    double count = std::get<2>(info);
+
+    if (index >= count)
+    {
+        throw;
+    }
+
+    return index*(max-min)/(count-1) + min;
+}
+
+void wdfTree::anotherPWave(double fuzz, std::vector<Essence>& p0Infos)
+{
+    // range_2
+    std::vector<std::tuple<double, double, int>> dimInfo = {
+        { -1.34424,    1.15187,     50 },
+        { -10.3443,    -7.84813,    50 },
+        { 8.06521,     8.99674,     50 }};
+
+    double p_3 = (5.48388e-05 + 0.000402146)/2.0;
+
+    int p0Count = std::get<2>(dimInfo[0]);
+    int p1Count = std::get<2>(dimInfo[1]);
+    int p2Count = std::get<2>(dimInfo[2]);
+
+    auto& iVec = dynamic_cast<wdfRootNL*>(root.get())->NlSolver->iVec;
+    Wvec *Emat_in = dynamic_cast<wdfRootNL*>(root.get())->NlSolver->Emat_in;
+
+    // Essence: <i_x start value, i_x knee_1 index, i_x knee_1 value, i_x knee_2 index, i_x knee_2 value, i_x end value>
+    double p0_Range = std::get<1>(dimInfo[0]) - std::get<0>(dimInfo[0]);
+    double p0_Delta = p0_Range/(std::get<2>(dimInfo[0]) - 1);
+
+    for (int p1Index = 0; p1Index < p1Count; p1Index++)
+    {
+        Essence p0Info;
+
+        for (int p2Index = 0; p2Index < p2Count; p2Index++)
+        {
+            (*Emat_in)(1) = getValueByIndex(dimInfo[1], p1Index);
+            (*Emat_in)(2) = getValueByIndex(dimInfo[2], p2Index);
+            (*Emat_in)(3) = p_3;
+
+            for (int p0Index = 0; p0Index < p0Count; p0Index++)
+            {
+                (*Emat_in)(0) = getValueByIndex(dimInfo[0], p0Index);
+
+                root->processAscendingWaves( ascendingWaves.get(), descendingWaves.get() );
+            }
+
+            // find key point in each i_x
+            for (int currentDim = 0; currentDim < iVec[0].n_elem; currentDim++)
+            {
+                p0Info = Essence();
+                std::get<0>(p0Info) = iVec[0].at(currentDim);
+                std::get<5>(p0Info) = iVec[iVec.size()-1].at(currentDim);
+
+                double prevAngle = 0.0;
+                double angle = 0.0;
+                double xDelta = getValueByIndex(dimInfo[0], 1) - getValueByIndex(dimInfo[0], 0);
+
+                double scale = p0_Range/ abs(iVec[iVec.size() - 1].at(currentDim) - iVec[0].at(currentDim));
+
+                // find first start knee
+                for (int i = 1; i < iVec.size(); i++)
+                {
+                    double yDeltaScaled = (iVec[i].at(currentDim) - iVec[i-1].at(currentDim)) * scale;
+                    double currentAngle = atan(yDeltaScaled/p0_Delta);
+
+                    if (i == 1)
+                    {
+                        prevAngle = currentAngle;
+                        continue;
+                    }
+
+                    angle += currentAngle - prevAngle;
+                    prevAngle = currentAngle;
+
+                    if (abs(angle) > 0.5)
+                    {
+                        double firstGuai = getValueByIndex(dimInfo[0], i);
+                        std::get<1>(p0Info) = i-1;
+                        std::get<2>(p0Info) = iVec[i-1].at(currentDim);
+                        break;
+                    }
+                }
+
+                // find first end knee
+                prevAngle = 0.0;
+                angle = 0.0;
+                for (int i = iVec.size() - 2; i >= 0; i--)
+                {
+                    double yDeltaScaled = (iVec[i].at(currentDim) - iVec[i+1].at(currentDim)) * scale;
+                    double currentAngle = atan(yDeltaScaled/p0_Delta);
+
+                    if (i == iVec.size() - 2)
+                    {
+                        prevAngle = currentAngle;
+                        continue;
+                    }
+
+                    angle += currentAngle - prevAngle;
+                    prevAngle = currentAngle;
+
+                    //if (angle < -0.5)
+                    if (abs(angle) > 0.5)
+                    {
+                        std::get<3>(p0Info) = i+1;
+                        std::get<4>(p0Info) = iVec[i+1].at(currentDim);
+                        break;
+                    }
+                }
+
+                p0Infos.push_back(p0Info);
+            }
+            iVec.clear();
+        }
     }
 }
 
