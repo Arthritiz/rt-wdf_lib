@@ -110,20 +110,10 @@ nlNewtonSolver::~nlNewtonSolver( ) {
 #endif
 }
 
-//----------------------------------------------------------------------
-void nlNewtonSolver::nlSolve( Wvec* inWaves,
-                          Wvec* outWaves ) {
-
+void nlNewtonSolver::iterWay()
+{
     int iter = 0;            // # of iteration
     FloatType alpha = 1.0;
-
-#ifndef RECORD_TABLE
-    *Emat_in = (myMatData->Emat)*(*inWaves);
-#endif
-
-#ifdef TRACKING
-    pTracker.track(*Emat_in);
-#endif
 
     MAT_SETZERO((*J));
 
@@ -206,6 +196,25 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 //
 //    debugOutput("iter: " + std::to_string(iter) + ", normF: " + resSN + "\n");
 //#endif
+}
+
+void nlNewtonSolver::interpoTabWay()
+{
+
+}
+
+//----------------------------------------------------------------------
+void nlNewtonSolver::nlSolve( Wvec* inWaves,
+                          Wvec* outWaves ) {
+#ifndef RECORD_TABLE
+    *Emat_in = (myMatData->Emat)*(*inWaves);
+#endif
+
+#ifdef TRACKING
+    pTracker.track(*Emat_in);
+#endif
+
+    iterWay();
 
     (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * (*fNL);
 

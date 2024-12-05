@@ -40,7 +40,7 @@
 //#define PREV_WAY
 //#define TRACKING
 //#define BTWAY
-#define RECORD_TABLE
+//#define RECORD_TABLE
 
 //==============================================================================
 // Define enums for solver identifiers
@@ -226,6 +226,11 @@ public:
      @param *x                  is a pointer to the input values x
     */
     void evalNlModels(matData* myMatData, Wvec* x);
+
+    void iterWay();
+    void interpoTabWay();
+
+    std::vector<Essence>
 
 };
 
