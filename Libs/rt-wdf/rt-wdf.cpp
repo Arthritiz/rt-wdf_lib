@@ -75,15 +75,52 @@ double getValueByIndex(std::tuple<double, double, int> info, int index)
     return index*(max-min)/(count-1) + min;
 }
 
+#ifdef RECORD_TABLE
+void wdfTree::singlePWave()
+{
+    double startP = -1.34491;
+    double endP = 1.159091;
+    double count = 10e3;
+
+    if (startP > endP)
+    {
+        throw;
+    }
+
+    double step = (endP - startP)/(count - 1);
+
+    Wvec *Emat_in = dynamic_cast<wdfRootNL*>(root.get())->NlSolver->Emat_in;
+
+    (*Emat_in)(1) = -10.3443;
+    (*Emat_in)(2) = 8.06521;
+    (*Emat_in)(3) = 5.48388e-05;
+
+    double p = startP;
+    for (int i = 0; i < count; i++, p += step)
+    {
+        (*Emat_in)(0) = p;
+
+        root->processAscendingWaves( ascendingWaves.get(), descendingWaves.get() );
+    }
+}
+
 void wdfTree::anotherPWave(double fuzz, std::vector<Essence>& p0Infos)
 {
     // range_2
-    std::vector<std::tuple<double, double, int>> dimInfo = {
-        { -1.34424,    1.15187,     50 },
-        { -10.3443,    -7.84813,    50 },
-        { 8.06521,     8.99674,     50 }};
+    //std::vector<RangeInfo> dimInfo = {
+    //    { -1.34424,    1.15187,     50 },
+    //    { -10.3443,    -7.84813,    50 },
+    //    { 8.06521,     8.99674,     50 }};
 
-    double p_3 = (5.48388e-05 + 0.000402146)/2.0;
+    //double p_3 = (5.48388e-05 + 0.000402146)/2.0;
+
+    // range_3
+    std::vector<RangeInfo> dimInfo = {
+        { -1.34491    , 1.159091, 50    },
+        { -10.34491   , -7.84091, 50    },
+        { 8.0741     , 8.997811 , 50    }};
+
+    double p_3 = (5.46112e-05 + 0.0004016851)/2.0;
 
     int p0Count = std::get<2>(dimInfo[0]);
     int p1Count = std::get<2>(dimInfo[1]);
@@ -98,8 +135,6 @@ void wdfTree::anotherPWave(double fuzz, std::vector<Essence>& p0Infos)
 
     for (int p1Index = 0; p1Index < p1Count; p1Index++)
     {
-        Essence p0Info;
-
         for (int p2Index = 0; p2Index < p2Count; p2Index++)
         {
             (*Emat_in)(1) = getValueByIndex(dimInfo[1], p1Index);
@@ -116,9 +151,9 @@ void wdfTree::anotherPWave(double fuzz, std::vector<Essence>& p0Infos)
             // find key point in each i_x
             for (int currentDim = 0; currentDim < iVec[0].n_elem; currentDim++)
             {
-                p0Info = Essence();
-                std::get<0>(p0Info) = iVec[0].at(currentDim);
-                std::get<5>(p0Info) = iVec[iVec.size()-1].at(currentDim);
+                Essence p0Info;
+                p0Info.startVal = iVec[0].at(currentDim);
+                p0Info.endVal = iVec[iVec.size()-1].at(currentDim);
 
                 double prevAngle = 0.0;
                 double angle = 0.0;
@@ -144,8 +179,8 @@ void wdfTree::anotherPWave(double fuzz, std::vector<Essence>& p0Infos)
                     if (abs(angle) > 0.5)
                     {
                         double firstGuai = getValueByIndex(dimInfo[0], i);
-                        std::get<1>(p0Info) = i-1;
-                        std::get<2>(p0Info) = iVec[i-1].at(currentDim);
+                        p0Info.firstStartKneeIndex = i-1;
+                        p0Info.firstStartKneeVal = iVec[i-1].at(currentDim);
                         break;
                     }
                 }
@@ -170,10 +205,15 @@ void wdfTree::anotherPWave(double fuzz, std::vector<Essence>& p0Infos)
                     //if (angle < -0.5)
                     if (abs(angle) > 0.5)
                     {
-                        std::get<3>(p0Info) = i+1;
-                        std::get<4>(p0Info) = iVec[i+1].at(currentDim);
+                        p0Info.firstEndKneeIndex = i+1;
+                        p0Info.firstEndKneeVal = iVec[i+1].at(currentDim);
                         break;
                     }
+                }
+
+                if (p0Info.firstStartKneeIndex >= p0Info.firstEndKneeIndex)
+                {
+                    throw;
                 }
 
                 p0Infos.push_back(p0Info);
@@ -182,6 +222,7 @@ void wdfTree::anotherPWave(double fuzz, std::vector<Essence>& p0Infos)
         }
     }
 }
+#endif
 
 void wdfTree::pWave()
 {

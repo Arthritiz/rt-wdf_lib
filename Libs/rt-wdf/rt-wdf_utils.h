@@ -59,7 +59,31 @@ using WcolVec = arma::colvec;
 //
 //#define W_SUBVEC(VEC, START, END)
 
-using Essence = std::tuple<double, int, double, int, double, double>;
+//using Essence = std::tuple<double, int, double, int, double, double>;
+using RangeInfo = std::tuple<double, double, int>;
+
+class Essence
+{
+public:
+ Essence() {}
+
+ Essence(std::vector<std::string> ss)
+ {
+  this->startVal =            std::stod(ss[0]);
+  this->firstStartKneeIndex = std::stoi(ss[1]);
+  this->firstStartKneeVal =   std::stod(ss[2]);
+  this->firstEndKneeIndex =   std::stoi(ss[3]);
+  this->firstEndKneeVal =     std::stod(ss[4]);
+  this->endVal =              std::stod(ss[5]);
+ }
+
+ FloatType startVal;
+ int firstStartKneeIndex;
+ FloatType firstStartKneeVal;
+ int firstEndKneeIndex;
+ FloatType firstEndKneeVal;
+ FloatType endVal;
+};
 
 class RangeTracker
 {

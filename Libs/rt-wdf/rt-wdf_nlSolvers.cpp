@@ -63,7 +63,7 @@ nlNewtonSolver::nlNewtonSolver( std::vector<nlModel*> nlList,
                         matData* myMatData ) :
                                 myMatData ( myMatData )  {
 
-    std::cout << "newton tol: " << TOL << std::endl;
+    //std::cout << "newton tol: " << TOL << std::endl;
 
     nlModels = nlList;
 
@@ -99,14 +99,15 @@ nlNewtonSolver::~nlNewtonSolver( ) {
     delete Fmat_fNL;
 
 #ifdef TRACKING
-    std::cout << "totalIter: " << totalIter << ", callCount: " << callCount << std::endl;
-    std::cout << "avgIter(vanilla): " << totalIter/(float)callCount << std::endl;
-
+    //std::cout << "totalIter: " << totalIter << ", callCount: " << callCount << std::endl;
+    //std::cout << "avgIter(vanilla): " << totalIter/(float)callCount << std::endl;
     avgIter = (avgIter * callCount/STEP + totalSubIter/(float)STEP)/(callCount/(float)STEP);
-    std::cout << "avgIter(my way): " << avgIter << std::endl;
+    //std::cout << "avgIter(my way): " << avgIter << std::endl;
 
-    std::cout << "solver elapsed: " << totalElapsed << std::endl;
-    pTracker.print();
+    std::cout << totalIter/(float)callCount << "," << avgIter;
+
+    //std::cout << "solver elapsed: " << totalElapsed << std::endl;
+    //pTracker.print();
 #endif
 }
 
@@ -198,9 +199,96 @@ void nlNewtonSolver::iterWay()
 //#endif
 }
 
+FloatType interpolation(int startIndex, int endIndex, FloatType startVal, FloatType endVal, int currentIndex)
+{
+ return (endVal - startVal)*(currentIndex - startIndex)/(endIndex - startIndex) + startVal;
+}
+
+Wvec nlNewtonSolver::interpoCore(int p0Index, int p1Index, int p2Index, int fuzzIndex)
+{
+    int p1Count = std::get<2>(pRangeList[1]);
+    int p2Count = std::get<2>(pRangeList[2]);
+
+    int essenceStartIndex = fuzzIndex*(p1Count*p2Count*dimSize) + p1Index*(p2Count*dimSize) + p2Index*dimSize;
+
+
+    Wvec iVec;
+    iVec.set_size(fNL->n_elem);
+
+    for (int relI = 0; relI< dimSize; relI++)
+    {
+        Essence& essence = essenceList[essenceStartIndex+relI];
+
+        FloatType val;
+
+        if (p0Index <= essence.firstStartKneeIndex) // compare with first start knee index
+        {
+           val = interpolation(0, essence.firstStartKneeIndex, essence.startVal, essence.firstStartKneeVal, p0Index);
+        } else if (p0Index <= essence.firstEndKneeIndex)
+        {
+           val = interpolation(essence.firstStartKneeIndex, essence.firstEndKneeIndex, essence.firstStartKneeVal, essence.firstEndKneeVal, p0Index);
+        } else
+        {
+           val = interpolation(essence.firstEndKneeIndex, std::get<2>(pRangeList[0]) - 1, essence.firstEndKneeVal, essence.endVal, p0Index);
+        }
+
+        iVec(relI) = val;
+    }
+
+    return iVec;
+}
+
 void nlNewtonSolver::interpoTabWay()
 {
+    if (0 == dimSize)
+    {
+        throw;
+    }
 
+    for (int i = 0; i < pRangeList.size(); i++)
+    {
+        if((*Emat_in)(i) > std::get<1>(pRangeList[i]))
+        {
+            (*Emat_in)(i) = std::get<1>(pRangeList[i]);
+        }
+
+        if((*Emat_in)(i) < std::get<0>(pRangeList[i]))
+        {
+            (*Emat_in)(i) = std::get<0>(pRangeList[i]);
+        }
+    }
+
+    std::vector<int> pIndexList;
+
+    for (int i = 0; i < pRangeList.size(); i++)
+    {
+        RangeInfo& rangeInfo = pRangeList[i];
+        FloatType rawIndex = (std::get<2>(rangeInfo) - 1)*((*Emat_in)(i) - std::get<0>(rangeInfo))/(std::get<1>(rangeInfo) - std::get<0>(rangeInfo));
+
+        if (rawIndex - std::round(rawIndex) > 0.5)
+        {
+            pIndexList.push_back(std::round(rawIndex) + 1);
+        } else
+        {
+            pIndexList.push_back(std::round(rawIndex));
+        }
+    }
+
+    FloatType rawFuzzIndex = (std::get<2>(fuzzRange) - 1)*(fuzz - std::get<0>(fuzzRange))/(std::get<1>(fuzzRange) - std::get<0>(fuzzRange));
+
+    FloatType lowerFuzzIndex = std::round(rawFuzzIndex);
+    Wvec lowerIVec = interpoCore(pIndexList[0], pIndexList[1], pIndexList[2], int(lowerFuzzIndex));
+
+    //if (int(rawFuzzIndex) >= std::get<2>(fuzzRange) - 1)
+    //{
+    //    *fNL = lowerIVec;
+    //    return;
+    //}
+
+    FloatType upperFuzzIndex = lowerFuzzIndex + 1;
+    Wvec upperIVec = interpoCore(pIndexList[0], pIndexList[1], pIndexList[2], int(upperFuzzIndex));
+
+    *fNL = (rawFuzzIndex - lowerFuzzIndex)*upperIVec + (upperFuzzIndex - rawFuzzIndex)*lowerIVec;
 }
 
 //----------------------------------------------------------------------
@@ -215,6 +303,7 @@ void nlNewtonSolver::nlSolve( Wvec* inWaves,
 #endif
 
     iterWay();
+    //interpoTabWay();
 
     (*outWaves) = (myMatData->Mmat) * (*inWaves) + (myMatData->Nmat) * (*fNL);
 

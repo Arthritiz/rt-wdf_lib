@@ -40,7 +40,7 @@
 //#define PREV_WAY
 //#define TRACKING
 //#define BTWAY
-//#define RECORD_TABLE
+#define RECORD_TABLE
 
 //==============================================================================
 // Define enums for solver identifiers
@@ -57,7 +57,7 @@
 // Newton Solver config parameters
 
 /** tolerance for ||F||_2 */
-#define TOL     1.0e-9                     // TODO: evaluate physically meaningful tolerance.
+#define TOL     1.0e-4                     // TODO: evaluate physically meaningful tolerance.
 /** limit on function evaluations */
 #define ITMAX   2000
 
@@ -72,6 +72,12 @@ class nlNewtonSolver;
 class nlSolver {
 
 public:
+    RangeInfo fuzzRange;
+    std::vector<RangeInfo> pRangeList;
+    std::vector<Essence> essenceList;
+    FloatType fuzz;
+    int dimSize = 0;
+
 #ifdef RECORD_TABLE
     std::vector<Wvec> pVec;
     std::vector<Wvec> iVec;
@@ -228,10 +234,10 @@ public:
     void evalNlModels(matData* myMatData, Wvec* x);
 
     void iterWay();
+
+    // interpolation tab way
+    Wvec interpoCore(int p0Index, int p1Index, int p2Index, int fuzzIndex);
     void interpoTabWay();
-
-    std::vector<Essence>
-
 };
 
 // [tab solver]: unfinished and deprecated

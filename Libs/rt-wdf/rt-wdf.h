@@ -230,6 +230,7 @@ public:
      */
     void cycleWave( );
 
+    void singlePWave();
     void anotherPWave(double fuzz, std::vector<Essence>& p0Infos);
     void pWave();
 
